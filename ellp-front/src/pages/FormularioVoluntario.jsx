@@ -24,6 +24,7 @@ const estadoInicial = {
   periodo: '',
   ra: '',
 };
+const camposUtfpr = ['curso', 'periodo', 'ra'];
 
 export function FormularioVoluntario() {
   const { id } = useParams();
@@ -59,18 +60,18 @@ export function FormularioVoluntario() {
         });
       })
       .catch(() => {
-        setErro('Não foi possível carregar os dados do voluntário.');
+        setErro('Não foi possível carregar os dados do voluntário. Tente novamente.');
       });
   }, [id, modoEdicao]);
 
   function atualizarCampo(evento) {
     const { name, type, value, checked } = evento.target;
 
-    setFormulario((anterior) => ({
-      ...anterior,
+    setFormulario((prev) => ({
+      ...prev,
       [name]: type === 'checkbox' ? checked : value,
       ...(name === 'estudanteUtfpr' && !checked
-        ? { curso: '', periodo: '', ra: '' }
+        ? Object.fromEntries(camposUtfpr.map((campo) => [campo, '']))
         : {}),
     }));
   }
@@ -89,15 +90,12 @@ export function FormularioVoluntario() {
       'dataEntrada',
     ];
 
-    const faltando = camposObrigatorios.some((campo) => !formulario[campo]);
-    if (faltando) {
+    const temCampoFaltando = camposObrigatorios.some((campo) => !formulario[campo]);
+    if (temCampoFaltando) {
       return 'Preencha todos os campos obrigatórios.';
     }
 
-    if (
-      formulario.estudanteUtfpr
-      && (!formulario.curso || !formulario.periodo || !formulario.ra)
-    ) {
+    if (formulario.estudanteUtfpr && camposUtfpr.some((campo) => !formulario[campo])) {
       return 'Preencha curso, período e RA para estudantes da UTFPR.';
     }
 
@@ -124,7 +122,7 @@ export function FormularioVoluntario() {
         navigate('/voluntarios');
       })
       .catch(() => {
-        setErro('Não foi possível salvar o voluntário.');
+        setErro('Não foi possível salvar o voluntário. Tente novamente.');
       });
   }
 
@@ -137,16 +135,16 @@ export function FormularioVoluntario() {
         {erro && <p className='erro-formulario'>{erro}</p>}
 
         <label htmlFor='nome'>Nome *</label>
-        <input id='nome' name='nome' value={formulario.nome} onChange={atualizarCampo} />
+        <input id='nome' name='nome' type='text' value={formulario.nome} onChange={atualizarCampo} />
 
         <label htmlFor='cpf'>CPF *</label>
-        <input id='cpf' name='cpf' value={formulario.cpf} onChange={atualizarCampo} />
+        <input id='cpf' name='cpf' type='text' value={formulario.cpf} onChange={atualizarCampo} />
 
         <label htmlFor='email'>E-mail *</label>
         <input id='email' name='email' type='email' value={formulario.email} onChange={atualizarCampo} />
 
         <label htmlFor='telefone'>Telefone *</label>
-        <input id='telefone' name='telefone' value={formulario.telefone} onChange={atualizarCampo} />
+        <input id='telefone' name='telefone' type='tel' value={formulario.telefone} onChange={atualizarCampo} />
 
         <label htmlFor='dataNascimento'>Data de nascimento *</label>
         <input
@@ -161,18 +159,19 @@ export function FormularioVoluntario() {
         <input
           id='nacionalidade'
           name='nacionalidade'
+          type='text'
           value={formulario.nacionalidade}
           onChange={atualizarCampo}
         />
 
         <label htmlFor='endereco'>Endereço *</label>
-        <input id='endereco' name='endereco' value={formulario.endereco} onChange={atualizarCampo} />
+        <input id='endereco' name='endereco' type='text' value={formulario.endereco} onChange={atualizarCampo} />
 
         <label htmlFor='cidade'>Cidade *</label>
-        <input id='cidade' name='cidade' value={formulario.cidade} onChange={atualizarCampo} />
+        <input id='cidade' name='cidade' type='text' value={formulario.cidade} onChange={atualizarCampo} />
 
         <label htmlFor='estado'>Estado *</label>
-        <input id='estado' name='estado' value={formulario.estado} onChange={atualizarCampo} />
+        <input id='estado' name='estado' type='text' value={formulario.estado} onChange={atualizarCampo} />
 
         <label htmlFor='dataEntrada'>Data de entrada *</label>
         <input id='dataEntrada' name='dataEntrada' type='date' value={formulario.dataEntrada} onChange={atualizarCampo} />
@@ -191,13 +190,13 @@ export function FormularioVoluntario() {
         {formulario.estudanteUtfpr && (
           <>
             <label htmlFor='curso'>Curso *</label>
-            <input id='curso' name='curso' value={formulario.curso} onChange={atualizarCampo} />
+            <input id='curso' name='curso' type='text' value={formulario.curso} onChange={atualizarCampo} />
 
             <label htmlFor='periodo'>Período *</label>
-            <input id='periodo' name='periodo' value={formulario.periodo} onChange={atualizarCampo} />
+            <input id='periodo' name='periodo' type='text' value={formulario.periodo} onChange={atualizarCampo} />
 
             <label htmlFor='ra'>RA *</label>
-            <input id='ra' name='ra' value={formulario.ra} onChange={atualizarCampo} />
+            <input id='ra' name='ra' type='text' value={formulario.ra} onChange={atualizarCampo} />
           </>
         )}
 
