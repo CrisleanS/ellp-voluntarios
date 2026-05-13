@@ -33,7 +33,7 @@ comunicando-se via API REST.
                                                          ▼
                                             ┌──────────────────────────┐
                                             │  Banco de Dados          │
-                                            │  PostgreSQL 15           │
+                                            │  PostgreSQL 16           │
                                             └──────────────────────────┘
 ```
 
@@ -54,7 +54,7 @@ com.ellp.voluntarios/
 | Frontend | React 18 + Vite + Axios |
 | Backend | Java 21 + Spring Boot 4 |
 | ORM | Spring Data JPA / Hibernate |
-| Banco de Dados | PostgreSQL 15 |
+| Banco de Dados | PostgreSQL 16 |
 | Geração de PDF | iText 7 |
 | Testes | JUnit 5 + Mockito + MockMvc |
 | Cobertura | JaCoCo |
@@ -93,7 +93,7 @@ mvn test
 
 ### Pré-requisitos
 - Java 21+
-- PostgreSQL 15+
+- PostgreSQL 16+
 - Node.js 18+
 
 ### Backend
