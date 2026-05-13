@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
 import { listarVoluntarios } from '../api/voluntarios';
+import { Link } from 'react-router-dom';
 
 import './ListagemVoluntarios.css'
 
@@ -23,6 +24,12 @@ export function ListagemVoluntarios() {
 			<Header />
 			<h2>Listagem de Voluntários</h2>
 
+			<div className='acoes-listagem'>
+				<Link to='/voluntarios/novo' className='botao-novo-voluntario'>
+					Novo voluntário
+				</Link>
+			</div>
+
 			<div className='botoes-status'>
 				<button onClick={() => setAtivo(true)} className='ativo'>Ativos</button>
 				<button onClick={() => setAtivo(false)} className='inativo'>Inativos</button>
@@ -42,6 +49,7 @@ export function ListagemVoluntarios() {
 						<th>Telefone</th>
 						<th>Status</th>
 						<th>Data de Entrada</th>
+						<th>Ações</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -57,6 +65,9 @@ export function ListagemVoluntarios() {
 								</span>
 							</td>
 							<td>{voluntario.dataEntrada}</td>
+							<td>
+								<Link to={`/voluntarios/${voluntario.id}/editar`}>Editar</Link>
+							</td>
 						</tr>
 					))}
 				</tbody>

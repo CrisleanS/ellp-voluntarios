@@ -59,6 +59,22 @@ h2 {
     border-radius: .5rem;
 }
 
+.acoes-listagem {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.botao-novo-voluntario {
+  display: inline-block;
+  background-color: #ffffff;
+  color: #09497d;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+}
+
 .ativo {
     color: #037903;
 
