@@ -64,28 +64,19 @@
 			<version>7.2.5</version>
 			<type>pom</type>
 		</dependency>
-<<<<<<< HEAD
-=======
 
 		<!-- Testes -->
->>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<<<<<<< HEAD
-=======
 
 		<!-- H2 para testes -->
->>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
-<<<<<<< HEAD
-		</dependency>	
-=======
 		</dependency>
 
 		<!-- Jackson -->
@@ -97,7 +88,6 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
->>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 	</dependencies>
 
 	<build>
