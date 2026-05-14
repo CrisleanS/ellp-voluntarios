@@ -1,5 +1,6 @@
 package com.ellp.voluntarios.service;
 
+import com.ellp.voluntarios.exception.RecursoNaoEncontradoException;
 import com.ellp.voluntarios.model.Voluntario;
 import com.ellp.voluntarios.repository.VoluntarioRepository;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ public class VoluntarioService {
 
     public Voluntario buscarPorId(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Voluntário não encontrado: " + id));
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Voluntário não encontrado: " + id));
     }
 
     public Voluntario registrarSaida(Long id, LocalDate dataSaida) {

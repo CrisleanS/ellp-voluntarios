@@ -1,8 +1,8 @@
 import './App.css'
 
 import { ListagemVoluntarios } from './pages/ListagemVoluntarios'
-import { Route, Routes } from 'react-router-dom'
 import { FormularioVoluntario } from './pages/FormularioVoluntario'
+import { Route, Routes } from 'react-router-dom'
 
 function App() {
 

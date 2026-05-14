@@ -1,6 +1,7 @@
 import { Header } from '../components/Header';
 import './FormularioVoluntario.css';
 import { useState } from 'react';
+import { cadastrarVoluntario } from '../api/voluntarios';
 
 export function FormularioVoluntario() {
 
@@ -9,15 +10,31 @@ export function FormularioVoluntario() {
 	const [email, setEmail] = useState('');
 	const [telefone, setTelefone] = useState('');
 
-	function handleSubmit(event) {
+	async function handleSubmit(event) {
 		event.preventDefault();
 
-		console.log({
-			nome,
-			cpf,
-			email,
-			telefone
-		});
+		const voluntario = {
+	        nome,
+	        cpf,
+	        email,
+	        telefone
+        };
+
+        try {
+	        await cadastrarVoluntario(voluntario);
+
+	        alert('Voluntário cadastrado com sucesso!');
+
+	        setNome('');
+	        setCpf('');
+	        setEmail('');
+	        setTelefone('');
+
+        } catch (error) {
+	        console.error(error);
+
+	        alert('Erro ao cadastrar voluntário.');
+        }
 	}
 
 	return (
