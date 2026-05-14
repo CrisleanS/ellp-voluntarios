@@ -23,7 +23,7 @@ O sistema segue a arquitetura de três camadas com frontend e backend separados,
 comunicando-se via API REST.
 
 ```
-┌─────────────────┐        HTTP/REST       ┌──────────────────────────┐
+┌─────────────────┐        HTTP/REST         ┌──────────────────────────┐
 │                 │ ──────────────────────▶ │                          │
 │  Frontend       │                         │  Backend                 │
 │  React 18+Vite  │ ◀────────────────────── │  Java 21 + Spring Boot 4 │
@@ -41,7 +41,8 @@ comunicando-se via API REST.
 
 ```
 com.ellp.voluntarios/
-├── controller/   VoluntarioController.java
+├── controller/   VoluntarioController.java · GlobalExceptionHandler.java
+├── exception/    RecursoNaoEncontradoException.java
 ├── service/      VoluntarioService.java · PdfService.java
 ├── repository/   VoluntarioRepository.java
 └── model/        Voluntario.java
@@ -61,6 +62,28 @@ com.ellp.voluntarios/
 | Versionamento | Git + GitHub |
 | Kanban | GitHub Projects |
 
+## Endpoints da API
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /api/voluntarios | Lista todos (param: ?ativo=true/false) |
+| GET | /api/voluntarios/{id} | Busca por ID |
+| POST | /api/voluntarios | Cadastra novo voluntário |
+| PUT | /api/voluntarios/{id} | Atualiza dados |
+| DELETE | /api/voluntarios/{id} | Remove voluntário |
+| PATCH | /api/voluntarios/{id}/saida | Registra saída |
+| GET | /api/voluntarios/{id}/termo | Gera Termo de Adesão em PDF |
+
+## Tratamento de Erros
+
+A API retorna respostas padronizadas para os erros mais comuns:
+
+| Situação | Status HTTP |
+|----------|-------------|
+| Recurso não encontrado | 404 Not Found |
+| CPF já cadastrado | 400 Bad Request |
+| Dados inválidos (validação) | 400 Bad Request |
+
 ## Estratégia de Testes
 
 Todos os requisitos funcionais possuem cobertura de testes automatizados.  
@@ -76,12 +99,11 @@ A meta mínima é **80% de cobertura nas classes de serviço**, monitorada pelo 
 
 ### Testes de Integração — `VoluntarioControllerTest` (MockMvc)
 - `POST /api/voluntarios` → 201 Created
-- `POST /api/voluntarios` com CPF inválido → 400 Bad Request
+- `POST /api/voluntarios` com CPF em branco → 400 Bad Request
 - `GET /api/voluntarios?ativo=true` → 200 com lista
 - `GET /api/voluntarios/{id}` inexistente → 404 Not Found
 - `PUT /api/voluntarios/{id}` → 200 atualizado
 - `DELETE /api/voluntarios/{id}` → 204 No Content
-- `GET /api/voluntarios/{id}/termo` → 200 application/pdf
 
 ### Relatório de Cobertura
 ```bash
@@ -101,10 +123,10 @@ mvn test
 # 1. Criar o banco de dados
 createdb ellp_voluntarios
 
-# 2. Subir o backend
-cd backend
+# 2. Subir o backend (porta 8081)
+cd voluntarios
 ./mvnw spring-boot:run
-# API disponível em http://localhost:8080/api
+# API disponível em http://localhost:8081/api
 ```
 
 ### Frontend
@@ -119,10 +141,9 @@ npm run dev
 
 | Nome | GitHub |
 |------|--------|
-| [nome do integrante 1] | [@usuario1] |
-| [nome do integrante 2] | [@usuario2] |
-| [nome do integrante 3] | [@usuario3] |
-| [nome do integrante 4] | [@usuario4] |
+| [nome do integrante 1] | [@CrisleanS] |
+| [nome do integrante 2] | [@FelipeShirae] |
+| [nome do integrante 3] | [@HeitorPF] |
 
 ## Requisitos Funcionais
 
