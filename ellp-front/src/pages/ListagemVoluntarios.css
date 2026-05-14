@@ -1,4 +1,68 @@
 h2 {
+<<<<<<< HEAD
+    text-align: center;
+    color: #FFF
+}
+
+.tabela-voluntarios{
+    text-align: left;
+    width: 80%;
+    margin: 0 auto;
+    background-color: #FFF;
+    border-radius: .5rem;
+    padding: 1rem;
+}
+
+.tabela-voluntarios tbody tr:hover {
+  background-color: #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+.tabela-voluntarios thead th {
+  background-color: #e97a22;
+  color: white;
+  padding: 10px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-align: left;
+}
+
+.tabela-voluntarios td, .tabela-voluntarios th {
+  padding: .6rem 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+
+.tabela-voluntarios td:nth-child(2), .tabela-voluntarios td:nth-child(4), .tabela-voluntarios td:nth-child(6) { /* Coluna do CPF e  telefone*/
+  font-family: monospace; /* Fontes mono facilitam leitura de números */
+  font-size: 1rem;
+}
+
+.botoes-status {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.botoes-status > *{
+    cursor: pointer;
+    padding: .5rem;
+}
+
+.usuarios-encontrados {
+    background-color: #FFF;
+    color: #e97a22;
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: fit-content;
+    margin: 1rem auto;
+    padding: .5rem 2rem;
+    border-radius: .5rem;
+}
+
+.ativo {
+    color: #037903;
+=======
 	text-align: center;
 	color: #FFF
 }
@@ -80,20 +144,32 @@ h2 {
 
 .ativo {
 	color: #037903;
+>>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 
 }
 
 .inativo {
+<<<<<<< HEAD
+    color: #FF0000;
+}
+
+.todos {
+    color: #0000FF;
+=======
 	color: #FF0000;
 }
 
 .todos {
 	color: #0000FF;
+>>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 }
 
 .ativo,
 .inativo,
 .todos {
+<<<<<<< HEAD
+    display: inline;
+=======
 	display: inline;
 }
 .modal-overlay {
@@ -132,4 +208,5 @@ h2 {
 	border-radius: 4px;
 	cursor: pointer;
 	float: right;
+>>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 }

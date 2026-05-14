@@ -1,0 +1,45 @@
+.container-formulario {
+	width: 80%;
+	margin: 2rem auto;
+	background-color: white;
+	padding: 2rem;
+	border-radius: 8px;
+}
+
+.formulario-voluntario {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.grupo-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.grupo-form label {
+	font-weight: bold;
+	margin-bottom: 0.3rem;
+}
+
+.grupo-form input {
+	padding: 0.7rem;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font-size: 1rem;
+}
+
+.formulario-voluntario button {
+	background-color: #ea7b23;
+	color: white;
+	border: none;
+	padding: 0.8rem;
+	font-size: 1rem;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.formulario-voluntario button:hover {
+	background-color: #cf691c;
+}
