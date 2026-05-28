@@ -1,17 +1,39 @@
 import './App.css'
 
+import { Routes, Route } from 'react-router-dom'
+
+import { Navbar } from './components/Navbar'
+
 import { ListagemVoluntarios } from './pages/ListagemVoluntarios'
 import { FormularioVoluntario } from './pages/FormularioVoluntario'
-import { Route, Routes } from 'react-router-dom'
 
 function App() {
 
   return (
-    <Routes>
-      <Route path='/' element={<h1>Página inicial</h1>} />
-      <Route path="/voluntarios" element={<ListagemVoluntarios />} />
-      <Route path="/voluntarios/novo" element={<FormularioVoluntario />} />
-    </Routes>
+    <>
+
+      <Navbar />
+
+      <Routes>
+
+        <Route
+          path='/'
+          element={<h1>Página inicial</h1>}
+        />
+
+        <Route
+          path="/voluntarios"
+          element={<ListagemVoluntarios />}
+        />
+
+        <Route
+          path="/voluntarios/novo"
+          element={<FormularioVoluntario />}
+        />
+
+      </Routes>
+
+    </>
   )
 }
 
