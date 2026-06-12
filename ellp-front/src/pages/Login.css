@@ -1,0 +1,110 @@
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Arial, Helvetica, sans-serif;
+	background: #1f5f8b;
+}
+
+.container-login {
+	min-height: 100vh;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	padding: 20px;
+}
+
+.card-login {
+	width: 100%;
+	max-width: 420px;
+
+	background: white;
+
+	padding: 40px;
+
+	border-radius: 12px;
+
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.logo-login {
+	text-align: center;
+	margin-bottom: 25px;
+}
+
+.logo-login h1 {
+	margin: 0;
+	font-size: 28px;
+	color: #1f5f8b;
+}
+
+.logo-login p {
+	margin-top: 8px;
+	color: #666;
+	font-size: 14px;
+}
+
+.form-login {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.grupo-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.grupo-form label {
+	margin-bottom: 6px;
+	font-weight: bold;
+	color: #333;
+}
+
+.grupo-form input {
+	padding: 12px;
+
+	border: 1px solid #ccc;
+	border-radius: 8px;
+
+	font-size: 15px;
+
+	outline: none;
+
+	transition: 0.2s;
+}
+
+.grupo-form input:focus {
+	border-color: #1f5f8b;
+	box-shadow: 0 0 5px rgba(31, 95, 139, 0.4);
+}
+
+.botao-login {
+	margin-top: 10px;
+
+	padding: 14px;
+
+	border: none;
+	border-radius: 8px;
+
+	background: #b45f06;
+	color: white;
+
+	font-size: 16px;
+	font-weight: bold;
+
+	cursor: pointer;
+
+	transition: 0.2s;
+}
+
+.botao-login:hover {
+	background: #944b04;
+}
+
+.erro-login {
+	color: red;
+	font-size: 14px;
+	text-align: center;
+}

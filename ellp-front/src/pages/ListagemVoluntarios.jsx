@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
 import { listarVoluntarios, registrarSaida } from '../api/voluntarios';
+import { Menu } from '../components/Menu';
 
 import './ListagemVoluntarios.css'
 
@@ -53,6 +54,7 @@ export function ListagemVoluntarios() {
 	return (
 		<>
 			<Header />
+			<Menu />
 			<h2>Listagem de Voluntários</h2>
 
 			<div className='botoes-status'>
@@ -97,15 +99,23 @@ export function ListagemVoluntarios() {
 
 							<td>{voluntario.dataEntrada}</td>
 
-							<td
-								className='botao-desativar'
-								onClick={(e) => {
-									e.stopPropagation();
-									desativarVoluntario(voluntario.id);
-								}}
-							>
-								{voluntario.ativo ? 'Desativar' : ''}
-							</td>
+							<td className='botao-desativar'>
+
+	{JSON.parse(localStorage.getItem('usuario'))?.tipo === 'ADMIN'
+		&& voluntario.ativo && (
+
+			<button
+				onClick={(e) => {
+					e.stopPropagation();
+
+					desativarVoluntario(voluntario.id);
+				}}
+			>
+				Desativar
+			</button>
+		)}
+
+</td>
 						</tr>
 					))}
 				</tbody>

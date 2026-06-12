@@ -1,39 +1,40 @@
 import './App.css'
 
-import { Routes, Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 
-import { Navbar } from './components/Navbar'
-
+import { Login } from './pages/Login'
 import { ListagemVoluntarios } from './pages/ListagemVoluntarios'
 import { FormularioVoluntario } from './pages/FormularioVoluntario'
+import { PrivateRoute } from './components/PrivateRoute'
+
 
 function App() {
 
   return (
-    <>
 
-      <Navbar />
+    <Routes>
 
-      <Routes>
+      <Route path="/" element={<Login />} />
 
-        <Route
-          path='/'
-          element={<h1>Página inicial</h1>}
-        />
+      <Route
+        path="/voluntarios"
+        element={
+      <PrivateRoute>
+      <ListagemVoluntarios />
+      </PrivateRoute>
+     }
+    />
 
-        <Route
-          path="/voluntarios"
-          element={<ListagemVoluntarios />}
-        />
+      <Route
+      path="/voluntarios/novo"
+       element={
+      <PrivateRoute>
+      <FormularioVoluntario />
+     </PrivateRoute>
+    }
+    />
 
-        <Route
-          path="/voluntarios/novo"
-          element={<FormularioVoluntario />}
-        />
-
-      </Routes>
-
-    </>
+    </Routes>
   )
 }
 
