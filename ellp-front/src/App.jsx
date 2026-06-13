@@ -1,16 +1,39 @@
 import './App.css'
 
+import { Route, Routes } from 'react-router-dom'
+
+import { Login } from './pages/Login'
 import { ListagemVoluntarios } from './pages/ListagemVoluntarios'
 import { FormularioVoluntario } from './pages/FormularioVoluntario'
-import { Route, Routes } from 'react-router-dom'
+import { PrivateRoute } from './components/PrivateRoute'
+
 
 function App() {
 
   return (
+
     <Routes>
-      <Route path='/' element={<h1>Página inicial</h1>} />
-      <Route path="/voluntarios" element={<ListagemVoluntarios />} />
-      <Route path="/voluntarios/novo" element={<FormularioVoluntario />} />
+
+      <Route path="/" element={<Login />} />
+
+      <Route
+        path="/voluntarios"
+        element={
+      <PrivateRoute>
+      <ListagemVoluntarios />
+      </PrivateRoute>
+     }
+    />
+
+      <Route
+      path="/voluntarios/novo"
+       element={
+      <PrivateRoute>
+      <FormularioVoluntario />
+     </PrivateRoute>
+    }
+    />
+
     </Routes>
   )
 }

@@ -1,11 +1,21 @@
 import { Header } from '../components/Header';
 import './FormularioVoluntario.css';
+import { Menu } from '../components/Menu';
+import { Navigate } from 'react-router-dom';
 
 import { useState } from 'react';
 
 import { cadastrarVoluntario } from '../api/voluntarios';
 
 export function FormularioVoluntario() {
+
+	const usuario = JSON.parse(
+		localStorage.getItem('usuario')
+	);
+
+	if (usuario?.tipo !== 'ADMIN') {
+		return <Navigate to="/voluntarios" />;
+	}
 
 	const [nome, setNome] = useState('');
 	const [cpf, setCpf] = useState('');
@@ -17,7 +27,9 @@ export function FormularioVoluntario() {
 	const [endereco, setEndereco] = useState('');
 	const [cidade, setCidade] = useState('');
 	const [estado, setEstado] = useState('');
+
 	const [dataEntrada, setDataEntrada] = useState('');
+	const [dataSaida, setDataSaida] = useState('');
 
 	const [estudanteUtfpr, setEstudanteUtfpr] = useState(false);
 
@@ -25,7 +37,10 @@ export function FormularioVoluntario() {
 	const [periodo, setPeriodo] = useState('');
 	const [ra, setRa] = useState('');
 
+	const [sinteseAtividades, setSinteseAtividades] = useState('');
+
 	async function handleSubmit(event) {
+
 		event.preventDefault();
 
 		if (
@@ -40,12 +55,14 @@ export function FormularioVoluntario() {
 			!estado ||
 			!dataEntrada
 		) {
+
 			alert('Preencha todos os campos obrigatórios.');
 
 			return;
 		}
 
 		if (estudanteUtfpr && (!curso || !periodo || !ra)) {
+
 			alert('Preencha os dados acadêmicos da UTFPR.');
 
 			return;
@@ -62,10 +79,13 @@ export function FormularioVoluntario() {
 			cidade,
 			estado,
 			dataEntrada,
+			ativo: true,
+			dataSaida,
 			estudanteUtfpr,
 			curso,
 			periodo,
-			ra
+			ra,
+			sinteseAtividades
 		};
 
 		try {
@@ -84,6 +104,7 @@ export function FormularioVoluntario() {
 			setCidade('');
 			setEstado('');
 			setDataEntrada('');
+			setDataSaida('');
 
 			setEstudanteUtfpr(false);
 
@@ -91,17 +112,25 @@ export function FormularioVoluntario() {
 			setPeriodo('');
 			setRa('');
 
-		} catch (error) {
+			setSinteseAtividades('');
 
-			console.error(error);
+		}catch (error) {
+  			console.error(error);
 
-			alert('Erro ao cadastrar voluntário.');
+ 			 console.log('Resposta:', error.response);
+
+  		alert(
+    		error.response?.data?.erro ||
+    		error.response?.data?.message ||
+    		'Erro ao cadastrar voluntário.'
+  		);
 		}
 	}
 
 	return (
 		<>
 			<Header />
+			<Menu />
 
 			<div className="container-formulario">
 
@@ -111,6 +140,8 @@ export function FormularioVoluntario() {
 					className="formulario-voluntario"
 					onSubmit={handleSubmit}
 				>
+
+					<h3>Dados Pessoais</h3>
 
 					<div className="grupo-form">
 						<label>Nome</label>
@@ -202,15 +233,7 @@ export function FormularioVoluntario() {
 						/>
 					</div>
 
-					<div className="grupo-form">
-						<label>Data de Entrada</label>
-
-						<input
-							type="date"
-							value={dataEntrada}
-							onChange={(e) => setDataEntrada(e.target.value)}
-						/>
-					</div>
+					<h3>Dados Acadêmicos</h3>
 
 					<div className="grupo-checkbox">
 
@@ -261,6 +284,38 @@ export function FormularioVoluntario() {
 
 						</>
 					)}
+
+					<h3>Participação no Projeto</h3>
+
+					<div className="grupo-form">
+						<label>Data de Entrada</label>
+
+						<input
+							type="date"
+							value={dataEntrada}
+							onChange={(e) => setDataEntrada(e.target.value)}
+						/>
+					</div>
+
+					<div className="grupo-form">
+						<label>Data de Saída</label>
+
+						<input
+							type="date"
+							value={dataSaida}
+							onChange={(e) => setDataSaida(e.target.value)}
+						/>
+					</div>
+
+					<div className="grupo-form">
+						<label>Síntese das Atividades</label>
+
+						<textarea
+							rows="6"
+							value={sinteseAtividades}
+							onChange={(e) => setSinteseAtividades(e.target.value)}
+						/>
+					</div>
 
 					<button type="submit">
 						Salvar Voluntário
