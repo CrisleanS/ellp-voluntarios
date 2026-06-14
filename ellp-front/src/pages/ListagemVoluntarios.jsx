@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
 import { listarVoluntarios, registrarSaida } from '../api/voluntarios';
 import { Menu } from '../components/Menu';
+import { formatarData } from '../uteis/formatarData';
 
 import './ListagemVoluntarios.css'
 
@@ -41,14 +42,6 @@ export function ListagemVoluntarios() {
 	function fecharDetalhes() {
 		setVoluntarioSelecionado(null)
 		setModalAberto(false)
-	}
-
-	function formatarData(dataIso) {
-		if (!dataIso) return '-';
-
-		const [ano, mes, dia] = dataIso.split('-');
-
-		return `${dia}/${mes}/${ano}`;
 	}
 
 	return (
@@ -101,21 +94,21 @@ export function ListagemVoluntarios() {
 
 							<td className='botao-desativar'>
 
-	{JSON.parse(localStorage.getItem('usuario'))?.tipo === 'ADMIN'
-		&& voluntario.ativo && (
+								{JSON.parse(localStorage.getItem('usuario'))?.tipo === 'ADMIN'
+									&& voluntario.ativo && (
 
-			<button
-				onClick={(e) => {
-					e.stopPropagation();
+										<button
+											onClick={(e) => {
+												e.stopPropagation();
 
-					desativarVoluntario(voluntario.id);
-				}}
-			>
-				Desativar
-			</button>
-		)}
+												desativarVoluntario(voluntario.id);
+											}}
+										>
+											Desativar
+										</button>
+									)}
 
-</td>
+							</td>
 						</tr>
 					))}
 				</tbody>
