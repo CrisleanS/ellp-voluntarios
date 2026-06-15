@@ -1,70 +1,6 @@
 h2 {
-<<<<<<< HEAD
-    text-align: center;
-    color: #FFF
-}
-
-.tabela-voluntarios{
-    text-align: left;
-    width: 80%;
-    margin: 0 auto;
-    background-color: #FFF;
-    border-radius: .5rem;
-    padding: 1rem;
-}
-
-.tabela-voluntarios tbody tr:hover {
-  background-color: #e9ecef;
-  transition: background-color 0.2s ease;
-}
-
-.tabela-voluntarios thead th {
-  background-color: #e97a22;
-  color: white;
-  padding: 10px;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-  text-align: left;
-}
-
-.tabela-voluntarios td, .tabela-voluntarios th {
-  padding: .6rem 0;
-  border-bottom: 1px solid #dee2e6;
-}
-
-
-.tabela-voluntarios td:nth-child(2), .tabela-voluntarios td:nth-child(4), .tabela-voluntarios td:nth-child(6) { /* Coluna do CPF e  telefone*/
-  font-family: monospace; /* Fontes mono facilitam leitura de números */
-  font-size: 1rem;
-}
-
-.botoes-status {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-.botoes-status > *{
-    cursor: pointer;
-    padding: .5rem;
-}
-
-.usuarios-encontrados {
-    background-color: #FFF;
-    color: #e97a22;
-    font-size: 1.2rem;
-    font-weight: bold;
-    width: fit-content;
-    margin: 1rem auto;
-    padding: .5rem 2rem;
-    border-radius: .5rem;
-}
-
-.ativo {
-    color: #037903;
-=======
 	text-align: center;
-	color: #FFF
+	color: #FFF;
 }
 
 .tabela-voluntarios {
@@ -101,13 +37,10 @@ h2 {
 	border-bottom: 1px solid #dee2e6;
 }
 
-
 .tabela-voluntarios td:nth-child(2),
 .tabela-voluntarios td:nth-child(4),
 .tabela-voluntarios td:nth-child(6) {
-	/* Coluna do CPF e  telefone*/
 	font-family: monospace;
-	/* Fontes mono facilitam leitura de números */
 	font-size: 1rem;
 }
 
@@ -115,9 +48,18 @@ h2 {
 	text-align: center;
 }
 
-.botao-desativar:hover {
+.botao-desativar button {
+	padding: 5px 10px;
+	cursor: pointer;
+	border: none;
+	border-radius: 4px;
+	color: white;
 	background-color: #dc3545;
-	transition: background-color 0.2s ease;	
+	font-size: 0.85rem;
+}
+
+.botao-desativar button:hover {
+	opacity: 0.85;
 }
 
 .botoes-status {
@@ -126,9 +68,58 @@ h2 {
 	gap: 20px;
 }
 
-.botoes-status>* {
+.botoes-status > * {
 	cursor: pointer;
 	padding: .5rem;
+}
+
+/* ── Barra de busca ── */
+.barra-busca {
+	display: flex;
+	justify-content: center;
+	margin: 15px auto;
+}
+
+.barra-busca input {
+	width: 40%;
+	padding: 10px 15px;
+	border: 2px solid #ccc;
+	border-radius: 8px;
+	font-size: 1rem;
+	outline: none;
+	transition: border-color 0.2s;
+}
+
+.barra-busca input:focus {
+	border-color: #e97a22;
+}
+
+/* ── Mensagens de feedback ── */
+.mensagem-feedback {
+	width: fit-content;
+	margin: 10px auto;
+	padding: 10px 25px;
+	border-radius: 6px;
+	font-weight: bold;
+	text-align: center;
+	animation: fadeIn 0.3s ease;
+}
+
+.mensagem-feedback.sucesso {
+	background-color: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.mensagem-feedback.erro {
+	background-color: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(-10px); }
+	to { opacity: 1; transform: translateY(0); }
 }
 
 .usuarios-encontrados {
@@ -144,34 +135,23 @@ h2 {
 
 .ativo {
 	color: #037903;
->>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
-
 }
 
 .inativo {
-<<<<<<< HEAD
-    color: #FF0000;
-}
-
-.todos {
-    color: #0000FF;
-=======
 	color: #FF0000;
 }
 
 .todos {
 	color: #0000FF;
->>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
 }
 
 .ativo,
 .inativo,
 .todos {
-<<<<<<< HEAD
-    display: inline;
-=======
 	display: inline;
 }
+
+/* ── Modal ── */
 .modal-overlay {
 	position: fixed;
 	top: 0;
@@ -194,6 +174,54 @@ h2 {
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+.modal-largo {
+	max-width: 700px;
+}
+
+.detalhes-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 15px;
+}
+
+.secao-detalhe h3 {
+	color: #e97a22;
+	margin-bottom: 8px;
+}
+
+.largura-total {
+	grid-column: 1 / -1;
+}
+
+.destaque-faculdade {
+	grid-column: 1 / -1;
+	background-color: #f0f7ff;
+	padding: 10px;
+	border-radius: 6px;
+}
+
+.sintese-box {
+	margin-top: 10px;
+	padding: 10px;
+	background-color: #f9f9f9;
+	border-radius: 6px;
+}
+
+.status-badge {
+	margin-left: 8px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-weight: bold;
+}
+
+.status-badge.ativo {
+	background-color: #d4edda;
+}
+
+.status-badge.inativo {
+	background-color: #f8d7da;
+}
+
 .detalhes-info p {
 	margin-bottom: 10px;
 	font-size: 1rem;
@@ -208,5 +236,8 @@ h2 {
 	border-radius: 4px;
 	cursor: pointer;
 	float: right;
->>>>>>> 160e29e70151a3f0efbaa11653ae7c0751f7739a
+}
+
+.btn-fechar:hover {
+	background-color: #c82333;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
-import { listarVoluntarios, registrarSaida } from '../api/voluntarios';
+import { listarVoluntarios, registrarSaida, gerarTermo } from '../api/voluntarios';
 import { Menu } from '../components/Menu';
 import { formatarData } from '../uteis/formatarData';
 
@@ -11,6 +11,8 @@ export function ListagemVoluntarios() {
 	const [voluntarioSelecionado, setVoluntarioSelecionado] = useState(null);
 	const [ativo, setAtivo] = useState(true)
 	const [modalAberto, setModalAberto] = useState(false)
+	const [busca, setBusca] = useState('')
+	const [mensagem, setMensagem] = useState(null) // { texto, tipo: 'sucesso' | 'erro' }
 
 	useEffect(() => {
 		listarVoluntarios(ativo)
@@ -19,8 +21,14 @@ export function ListagemVoluntarios() {
 			})
 			.catch(error => {
 				console.error('Erro ao listar voluntários:', error)
+				mostrarMensagem('Erro ao carregar voluntários.', 'erro')
 			});
 	}, [ativo])
+
+	function mostrarMensagem(texto, tipo) {
+		setMensagem({ texto, tipo })
+		setTimeout(() => setMensagem(null), 4000)
+	}
 
 	function desativarVoluntario(id) {
 		registrarSaida(id)
@@ -28,10 +36,29 @@ export function ListagemVoluntarios() {
 				setVoluntarios(prev =>
 					prev.map(v => v.id === id ? { ...v, ativo: false } : v)
 				)
+				mostrarMensagem('Voluntário desativado com sucesso.', 'sucesso')
 			})
 			.catch(error => {
 				console.error('Erro ao desativar voluntário:', error)
+				mostrarMensagem('Erro ao desativar voluntário.', 'erro')
 			});
+	}
+
+	async function baixarTermo(id, nome) {
+		try {
+			const response = await gerarTermo(id);
+			const blob = new Blob([response.data], { type: 'application/pdf' });
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `termo-voluntario-${id}.pdf`;
+			link.click();
+			window.URL.revokeObjectURL(url);
+			mostrarMensagem(`Termo de ${nome} gerado com sucesso.`, 'sucesso')
+		} catch (error) {
+			console.error('Erro ao gerar termo:', error)
+			mostrarMensagem('Erro ao gerar o termo em PDF.', 'erro')
+		}
 	}
 
 	function abrirDetalhes(voluntario) {
@@ -44,11 +71,28 @@ export function ListagemVoluntarios() {
 		setModalAberto(false)
 	}
 
+	// Filtro por texto (nome ou CPF)
+	const voluntariosFiltrados = voluntarios.filter(v => {
+		const termo = busca.toLowerCase()
+		return (
+			v.nome.toLowerCase().includes(termo) ||
+			v.cpf.toLowerCase().includes(termo)
+		)
+	})
+
+	const isAdmin = JSON.parse(localStorage.getItem('usuario'))?.tipo === 'ADMIN';
+
 	return (
 		<>
 			<Header />
 			<Menu />
 			<h2>Listagem de Voluntários</h2>
+
+			{mensagem && (
+				<div className={`mensagem-feedback ${mensagem.tipo}`}>
+					{mensagem.texto}
+				</div>
+			)}
 
 			<div className='botoes-status'>
 				<button onClick={() => setAtivo(true)} className='ativo'>Ativos</button>
@@ -56,8 +100,17 @@ export function ListagemVoluntarios() {
 				<button onClick={() => setAtivo(undefined)} className='todos'>Todos</button>
 			</div>
 
+			<div className='barra-busca'>
+				<input
+					type="text"
+					placeholder="Buscar por nome ou CPF..."
+					value={busca}
+					onChange={(e) => setBusca(e.target.value)}
+				/>
+			</div>
+
 			<div className='usuarios-encontrados'>
-				{voluntarios.length} voluntários encontrados
+				{voluntariosFiltrados.length} voluntários encontrados
 			</div>
 
 			<table className="tabela-voluntarios">
@@ -74,7 +127,7 @@ export function ListagemVoluntarios() {
 				</thead>
 
 				<tbody>
-					{voluntarios.map((voluntario) => (
+					{voluntariosFiltrados.map((voluntario) => (
 						<tr
 							key={voluntario.id}
 							onClick={() => abrirDetalhes(voluntario)}
@@ -90,23 +143,32 @@ export function ListagemVoluntarios() {
 								</span>
 							</td>
 
-							<td>{voluntario.dataEntrada}</td>
+							<td>{formatarData(voluntario.dataEntrada)}</td>
 
 							<td className='botao-desativar'>
 
-								{JSON.parse(localStorage.getItem('usuario'))?.tipo === 'ADMIN'
-									&& voluntario.ativo && (
+								{isAdmin && voluntario.ativo && (
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											desativarVoluntario(voluntario.id);
+										}}
+									>
+										Desativar
+									</button>
+								)}
 
-										<button
-											onClick={(e) => {
-												e.stopPropagation();
-
-												desativarVoluntario(voluntario.id);
-											}}
-										>
-											Desativar
-										</button>
-									)}
+								{isAdmin && (
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											baixarTermo(voluntario.id, voluntario.nome);
+										}}
+										style={{ marginLeft: '5px' }}
+									>
+										Gerar Termo
+									</button>
+								)}
 
 							</td>
 						</tr>

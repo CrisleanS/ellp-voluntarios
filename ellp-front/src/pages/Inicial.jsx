@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
 import { Menu } from '../components/Menu';
-import { buscarVoluntario } from '../api/voluntarios';
+import { buscarVoluntario, gerarTermo } from '../api/voluntarios';
 import { formatarData } from '../uteis/formatarData';
 import './Inicial.css'
 
@@ -10,20 +10,37 @@ export function Inicial() {
 	const [voluntario, setVoluntario] = useState(null)
 	const [modalAberto, setModalAberto] = useState(false)
 
-	buscarVoluntario(usuario.id)
-		.then(response => {
-			setVoluntario(response.data)
-		})
-		.catch(error => {
-			console.error('Erro ao pegar detalhes do voluntário:', error)
-		});
+	useEffect(() => {
+		const idVoluntario = usuario.voluntarioId || usuario.id;
 
-	function gerarPDF() {
-		console.log('função para gerar pdf')
+		buscarVoluntario(idVoluntario)
+			.then(response => {
+				setVoluntario(response.data)
+			})
+			.catch(error => {
+				console.error('Erro ao pegar detalhes do voluntário:', error)
+			});
+	}, []);
+
+	async function gerarPDF() {
+		try {
+			const idVoluntario = usuario.voluntarioId || usuario.id;
+			const response = await gerarTermo(idVoluntario);
+
+			const blob = new Blob([response.data], { type: 'application/pdf' });
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `termo-voluntario-${idVoluntario}.pdf`;
+			link.click();
+			window.URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error('Erro ao gerar PDF:', error);
+			alert('Erro ao gerar o termo em PDF.');
+		}
 	}
 
 	function modalDetalhes() {
-
 
 		return (
 			<div className="modal-overlay" onClick={() => setModalAberto(false)}>
@@ -156,7 +173,7 @@ export function Inicial() {
 				</button>
 			</div>
 
-			{modalAberto && modalDetalhes()}
+			{modalAberto && voluntario && modalDetalhes()}
 		</>
 	)
 
