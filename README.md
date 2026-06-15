@@ -8,14 +8,20 @@ UTFPR — Câmpus Cornélio Procópio
 
 Sistema web para gerenciar o ciclo de vida dos voluntários do projeto de extensão  
 **ELLP (Ensino Lúdico de Lógica e Programação)**, desde o cadastro até o desligamento,  
-com geração automática do Termo de Adesão para Voluntário(a) em PDF.
+com autenticação por login, controle de permissões (ADMIN/VOLUNTÁRIO) e  
+geração automática do Termo de Adesão para Voluntário(a) em PDF.
 
 ## Funcionalidades
 
-- Cadastrar, editar e remover voluntários
-- Registrar datas de entrada e saída
-- Listar voluntários ativos e inativos
-- Gerar o Termo de Adesão em PDF com os dados preenchidos automaticamente
+- **Autenticação** — Login com e-mail e senha, com controle de perfil (ADMIN / VOLUNTÁRIO)
+- **Cadastrar, editar e remover voluntários** — Formulário completo com dados pessoais, acadêmicos e de participação
+- **Registrar datas de entrada e saída** — Desativação de voluntários com registro automático de data
+- **Listar voluntários ativos e inativos** — Com filtro por status e busca por nome/CPF
+- **Mensagens de feedback** — Notificações visuais de sucesso e erro nas ações
+- **Síntese de atividades** — Campo para registro das atividades realizadas pelo voluntário
+- **Gerar Termo de Adesão em PDF** — Download automático com dados preenchidos
+- **Navegação por menus** — Menu dinâmico baseado no perfil do usuário
+- **Página inicial do voluntário** — Visualização dos próprios dados e geração de PDF
 
 ## Arquitetura
 
@@ -41,11 +47,22 @@ comunicando-se via API REST.
 
 ```
 com.ellp.voluntarios/
-├── controller/   VoluntarioController.java · GlobalExceptionHandler.java
+├── controller/   VoluntarioController.java · UsuarioController.java · GlobalExceptionHandler.java
+├── dto/          LoginRequest.java
 ├── exception/    RecursoNaoEncontradoException.java
-├── service/      VoluntarioService.java · PdfService.java
-├── repository/   VoluntarioRepository.java
-└── model/        Voluntario.java
+├── service/      VoluntarioService.java · UsuarioService.java · PdfService.java
+├── repository/   VoluntarioRepository.java · UsuarioRepository.java
+└── model/        Voluntario.java · Usuario.java
+```
+
+### Estrutura do Frontend
+
+```
+ellp-front/src/
+├── api/          voluntarios.js · usuarios.js
+├── components/   Header.jsx · Menu.jsx · Navbar.jsx · PrivateRoute.jsx
+├── pages/        Login.jsx · Inicial.jsx · ListagemVoluntarios.jsx · FormularioVoluntario.jsx
+└── uteis/        formatarData.js
 ```
 
 ## Tecnologias
@@ -53,7 +70,7 @@ com.ellp.voluntarios/
 | Camada | Tecnologia |
 |--------|-----------|
 | Frontend | React 18 + Vite + Axios |
-| Backend | Java 21 + Spring Boot 4 |
+| Backend | Java 21 + Spring Boot 4.0.6 |
 | ORM | Spring Data JPA / Hibernate |
 | Banco de Dados | PostgreSQL 16 |
 | Geração de PDF | iText 7 |
@@ -63,6 +80,8 @@ com.ellp.voluntarios/
 | Kanban | GitHub Projects |
 
 ## Endpoints da API
+
+### Voluntários
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
@@ -74,6 +93,12 @@ com.ellp.voluntarios/
 | PATCH | /api/voluntarios/{id}/saida | Registra saída |
 | GET | /api/voluntarios/{id}/termo | Gera Termo de Adesão em PDF |
 
+### Usuários
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | /api/usuarios/login | Autenticação por e-mail e senha |
+
 ## Tratamento de Erros
 
 A API retorna respostas padronizadas para os erros mais comuns:
@@ -83,6 +108,14 @@ A API retorna respostas padronizadas para os erros mais comuns:
 | Recurso não encontrado | 404 Not Found |
 | CPF já cadastrado | 400 Bad Request |
 | Dados inválidos (validação) | 400 Bad Request |
+| E-mail ou senha inválidos | 400 Bad Request |
+
+## Perfis de Usuário
+
+| Perfil | Permissões |
+|--------|-----------|
+| ADMIN | Cadastrar, editar, desativar voluntários. Visualizar listagem completa. Gerar termo de qualquer voluntário. |
+| VOLUNTARIO | Visualizar próprios dados. Gerar próprio termo em PDF. |
 
 ## Estratégia de Testes
 
@@ -137,6 +170,14 @@ npm run dev
 # App disponível em http://localhost:5173
 ```
 
+### Seed de dados (após primeira execução)
+```sql
+-- Usuário ADMIN
+INSERT INTO usuarios (nome, email, senha, tipo, voluntario_id)
+VALUES ('Administrador ELLP', 'admin@ellp.com', 'admin123', 'ADMIN', NULL)
+ON CONFLICT (email) DO NOTHING;
+```
+
 ## Equipe
 
 | Nome | GitHub |
@@ -147,11 +188,15 @@ npm run dev
 
 ## Requisitos Funcionais
 
-| ID | Descrição |
-|----|-----------|
-| RF01 | Cadastrar voluntário |
-| RF02 | Editar voluntário |
-| RF03 | Remover voluntário |
-| RF04 | Listar voluntários (com filtro ativo/inativo) |
-| RF05 | Registrar saída de voluntário |
-| RF06 | Gerar Termo de Voluntariado em PDF |
+| ID | Descrição | Status |
+|----|-----------|--------|
+| RF01 | Cadastrar voluntário | ✅ |
+| RF02 | Editar voluntário | ✅ |
+| RF03 | Remover voluntário | ✅ |
+| RF04 | Listar voluntários (com filtro ativo/inativo) | ✅ |
+| RF05 | Registrar saída de voluntário | ✅ |
+| RF06 | Gerar Termo de Voluntariado em PDF | ✅ |
+| RF07 | Autenticação com login (ADMIN/VOLUNTÁRIO) | ✅ |
+| RF08 | Navegação por menus com controle de perfil | ✅ |
+| RF09 | Busca por nome/CPF na listagem | ✅ |
+| RF10 | Síntese de atividades do voluntário | ✅ |
