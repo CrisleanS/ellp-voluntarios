@@ -30,15 +30,7 @@ export function Login() {
 				'usuario',
 				JSON.stringify(response.data)
 			);
-
-			if (response.data.tipo === 'ADMIN') {
-
-				navigate('/voluntarios/novo');
-
-			} else {
-
-				navigate('/voluntarios');
-			}
+			navigate('/inicial')
 
 		} catch (error) {
 
