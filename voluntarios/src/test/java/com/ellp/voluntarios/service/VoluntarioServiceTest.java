@@ -128,7 +128,7 @@ class VoluntarioServiceTest {
 
         assertTrue(ex.getMessage().contains("Voluntário não encontrado"));
     }
-    
+
     @Test
     void deve_editar_voluntario_com_sucesso() {
         Voluntario dadosAtualizados = Voluntario.builder()
@@ -140,7 +140,11 @@ class VoluntarioServiceTest {
                 .endereco("Rua B, 200")
                 .cidade("Cornélio Procópio")
                 .estado("PR")
-                .estudanteUtfpr(false)
+                .estudanteUtfpr(true)
+                .curso("Ciência da Computação")
+                .periodo("5º")
+                .ra("RA123456")
+                .sinteseAtividades("Atividades de extensão")
                 .build();
 
         when(repository.findById(1L)).thenReturn(Optional.of(voluntario));
@@ -150,6 +154,11 @@ class VoluntarioServiceTest {
 
         assertEquals("João Editado", resultado.getNome());
         assertEquals("joao.novo@email.com", resultado.getEmail());
+        assertEquals("Ciência da Computação", resultado.getCurso());
+        assertEquals("5º", resultado.getPeriodo());
+        assertEquals("RA123456", resultado.getRa());
+        assertEquals("Atividades de extensão", resultado.getSinteseAtividades());
+        assertTrue(resultado.getEstudanteUtfpr());
         verify(repository).save(voluntario);
     }
 
@@ -172,5 +181,47 @@ class VoluntarioServiceTest {
         assertEquals(1, resultado.size());
         verify(repository).findAll();
         verify(repository, never()).findByAtivo(any());
+    }
+
+    // ── reativar ──
+
+    @Test
+    void deve_reativar_voluntario_inativo_com_sucesso() {
+        voluntario.setAtivo(false);
+        voluntario.setDataSaida(LocalDate.of(2025, 6, 1));
+
+        when(repository.findById(1L)).thenReturn(Optional.of(voluntario));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Voluntario resultado = service.reativar(1L);
+
+        assertTrue(resultado.getAtivo());
+        assertNull(resultado.getDataSaida());
+        verify(repository).save(voluntario);
+    }
+
+    @Test
+    void deve_lancar_excecao_ao_reativar_voluntario_ja_ativo() {
+        when(repository.findById(1L)).thenReturn(Optional.of(voluntario));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.reativar(1L)
+        );
+
+        assertTrue(ex.getMessage().contains("já está ativo"));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deve_lancar_excecao_ao_reativar_id_inexistente() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException ex = assertThrows(
+                RecursoNaoEncontradoException.class,
+                () -> service.reativar(99L)
+        );
+
+        assertTrue(ex.getMessage().contains("Voluntário não encontrado"));
     }
 }
