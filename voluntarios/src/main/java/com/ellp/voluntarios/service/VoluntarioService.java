@@ -64,4 +64,16 @@ public class VoluntarioService {
         voluntario.setAtivo(false);
         return repository.save(voluntario);
     }
+
+    public Voluntario reativar(Long id) {
+        Voluntario voluntario = buscarPorId(id);
+
+        if (voluntario.getAtivo()) {
+            throw new IllegalArgumentException("Voluntário já está ativo.");
+        }
+
+        voluntario.setAtivo(true);
+        voluntario.setDataSaida(null);
+        return repository.save(voluntario);
+    }
 }

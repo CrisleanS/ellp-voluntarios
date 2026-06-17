@@ -1,5 +1,6 @@
 package com.ellp.voluntarios.controller;
 
+import com.ellp.voluntarios.dto.AlterarSenhaRequest;
 import com.ellp.voluntarios.dto.LoginRequest;
 import com.ellp.voluntarios.model.Usuario;
 import com.ellp.voluntarios.service.UsuarioService;
@@ -19,6 +20,14 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<Usuario> login(@Valid @RequestBody LoginRequest request) {
         Usuario usuario = service.login(request.getEmail(), request.getSenha());
+        return ResponseEntity.ok(usuario);
+    }
+
+    @PatchMapping("/{id}/alterar-senha")
+    public ResponseEntity<Usuario> alterarSenha(
+            @PathVariable Long id,
+            @Valid @RequestBody AlterarSenhaRequest request) {
+        Usuario usuario = service.alterarSenha(id, request.getSenhaAtual(), request.getNovaSenha());
         return ResponseEntity.ok(usuario);
     }
 }

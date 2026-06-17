@@ -60,6 +60,11 @@ public class VoluntarioController {
         return ResponseEntity.ok(service.registrarSaida(id, data));
     }
 
+    @PatchMapping("/{id}/ativar")
+    public ResponseEntity<Voluntario> reativar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.reativar(id));
+    }
+
     @GetMapping("/{id}/termo")
     public ResponseEntity<byte[]> gerarTermo(@PathVariable Long id) {
         Voluntario voluntario = service.buscarPorId(id);

@@ -32,6 +32,8 @@ public class Usuario {
     @NotBlank
     private String tipo; // "ADMIN" ou "VOLUNTARIO"
 
+    private Boolean primeiroLogin = true;
+
     // Vínculo opcional com a tabela de voluntários
     // Usado para voluntários que fazem login e precisam ver seus próprios dados
     private Long voluntarioId;
