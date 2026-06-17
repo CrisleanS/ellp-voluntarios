@@ -8,12 +8,7 @@ export function Menu() {
 		localStorage.getItem('usuario')
 	);
 
-	function logout() {
 
-		localStorage.removeItem('usuario');
-
-		navigate('/');
-	}
 
 	return (
 		usuario?.tipo === "ADMIN" && (
@@ -56,17 +51,6 @@ export function Menu() {
 					<span>
 						{usuario?.nome}
 					</span>
-
-					<button
-						onClick={logout}
-						style={{
-							padding: '5px 10px',
-							cursor: 'pointer'
-						}}
-					>
-						Sair
-					</button>
-
 				</div>
 
 			</nav>

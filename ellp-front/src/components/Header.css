@@ -1,7 +1,24 @@
 header{
+    position: relative;
     background-color: #FFF;
     font-size: 1.5rem;
     text-align: center;
     color: #09497d;
+}
+.logo{
+    cursor: pointer;
+    width: max-content;
+    margin: auto;
+}
+
+.logout-button{
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ea7b23;
+    color: #FFF;
+    padding: .3rem 1rem;
+    border-radius: .3rem;
     cursor: pointer;
 }
