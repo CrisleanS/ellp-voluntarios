@@ -14,8 +14,10 @@ geração automática do Termo de Adesão para Voluntário(a) em PDF.
 ## Funcionalidades
 
 - **Autenticação** — Login com e-mail e senha, com controle de perfil (ADMIN / VOLUNTÁRIO)
+- **Troca de senha no primeiro acesso** — Redirecionamento automático para alteração de senha obrigatória
 - **Cadastrar, editar e remover voluntários** — Formulário completo com dados pessoais, acadêmicos e de participação
 - **Registrar datas de entrada e saída** — Desativação de voluntários com registro automático de data
+- **Reativar voluntários** — Reativação de voluntários inativos com limpeza da data de saída
 - **Listar voluntários ativos e inativos** — Com filtro por status e busca por nome/CPF
 - **Mensagens de feedback** — Notificações visuais de sucesso e erro nas ações
 - **Síntese de atividades** — Campo para registro das atividades realizadas pelo voluntário
@@ -48,7 +50,7 @@ comunicando-se via API REST.
 ```
 com.ellp.voluntarios/
 ├── controller/   VoluntarioController.java · UsuarioController.java · GlobalExceptionHandler.java
-├── dto/          LoginRequest.java
+├── dto/          LoginRequest.java · AlterarSenhaRequest.java
 ├── exception/    RecursoNaoEncontradoException.java
 ├── service/      VoluntarioService.java · UsuarioService.java · PdfService.java
 ├── repository/   VoluntarioRepository.java · UsuarioRepository.java
@@ -91,6 +93,7 @@ ellp-front/src/
 | PUT | /api/voluntarios/{id} | Atualiza dados |
 | DELETE | /api/voluntarios/{id} | Remove voluntário |
 | PATCH | /api/voluntarios/{id}/saida | Registra saída |
+| PATCH | /api/voluntarios/{id}/ativar | Reativa voluntário inativo |
 | GET | /api/voluntarios/{id}/termo | Gera Termo de Adesão em PDF |
 
 ### Usuários
@@ -98,6 +101,7 @@ ellp-front/src/
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | POST | /api/usuarios/login | Autenticação por e-mail e senha |
+| PATCH | /api/usuarios/{id}/alterar-senha | Altera senha (obrigatório no primeiro login) |
 
 ## Tratamento de Erros
 
@@ -109,12 +113,15 @@ A API retorna respostas padronizadas para os erros mais comuns:
 | CPF já cadastrado | 400 Bad Request |
 | Dados inválidos (validação) | 400 Bad Request |
 | E-mail ou senha inválidos | 400 Bad Request |
+| Senha atual incorreta | 400 Bad Request |
+| Nova senha igual à atual | 400 Bad Request |
+| Voluntário já está ativo | 400 Bad Request |
 
 ## Perfis de Usuário
 
 | Perfil | Permissões |
 |--------|-----------|
-| ADMIN | Cadastrar, editar, desativar voluntários. Visualizar listagem completa. Gerar termo de qualquer voluntário. |
+| ADMIN | Cadastrar, editar, desativar e reativar voluntários. Visualizar listagem completa. Gerar termo de qualquer voluntário. |
 | VOLUNTARIO | Visualizar próprios dados. Gerar próprio termo em PDF. |
 
 ## Estratégia de Testes
@@ -172,9 +179,9 @@ npm run dev
 
 ### Seed de dados (após primeira execução)
 ```sql
--- Usuário ADMIN
-INSERT INTO usuarios (nome, email, senha, tipo, voluntario_id)
-VALUES ('Administrador ELLP', 'admin@ellp.com', 'admin123', 'ADMIN', NULL)
+-- Usuário ADMIN (primeiro_login = false para o admin padrão)
+INSERT INTO usuarios (nome, email, senha, tipo, voluntario_id, primeiro_login)
+VALUES ('Administrador ELLP', 'admin@ellp.com', 'admin123', 'ADMIN', NULL, false)
 ON CONFLICT (email) DO NOTHING;
 ```
 
@@ -200,3 +207,5 @@ ON CONFLICT (email) DO NOTHING;
 | RF08 | Navegação por menus com controle de perfil | ✅ |
 | RF09 | Busca por nome/CPF na listagem | ✅ |
 | RF10 | Síntese de atividades do voluntário | ✅ |
+| RF11 | Troca de senha obrigatória no primeiro login | ✅ |
+| RF12 | Reativar voluntário inativo | ✅ |
