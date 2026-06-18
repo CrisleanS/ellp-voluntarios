@@ -3,10 +3,14 @@ import { Header } from '../components/Header';
 import { listarVoluntarios, registrarSaida, gerarTermo } from '../api/voluntarios';
 import { Menu } from '../components/Menu';
 import { formatarData } from '../uteis/formatarData';
+import { useNavigate } from 'react-router-dom';
 
 import './ListagemVoluntarios.css'
 
 export function ListagemVoluntarios() {
+
+	const navigate = useNavigate();
+
 	const [voluntarios, setVoluntarios] = useState([]);
 	const [voluntarioSelecionado, setVoluntarioSelecionado] = useState(null);
 	const [ativo, setAtivo] = useState(true)
@@ -69,6 +73,11 @@ export function ListagemVoluntarios() {
 	function fecharDetalhes() {
 		setVoluntarioSelecionado(null)
 		setModalAberto(false)
+	}
+
+	function editarVoluntario(voluntario) {
+		setVoluntarioSelecionado(voluntario)
+		navigate("/voluntarios/novo", { state:{ voluntario } })
 	}
 
 	// Filtro por texto (nome ou CPF)
@@ -167,6 +176,17 @@ export function ListagemVoluntarios() {
 										style={{ marginLeft: '5px' }}
 									>
 										Gerar Termo
+									</button>
+								)}
+
+								{isAdmin && (
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											editarVoluntario(voluntario)
+										}}
+									>
+										Editar
 									</button>
 								)}
 

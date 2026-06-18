@@ -11,7 +11,7 @@ export function Inicial() {
 	const [modalAberto, setModalAberto] = useState(false)
 
 	useEffect(() => {
-		const idVoluntario = usuario.voluntarioId || usuario.id;
+		const idVoluntario = usuario.id;
 
 		buscarVoluntario(idVoluntario)
 			.then(response => {

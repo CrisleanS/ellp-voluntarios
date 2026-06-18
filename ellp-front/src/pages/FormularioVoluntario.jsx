@@ -1,13 +1,17 @@
 import { Header } from '../components/Header';
 import './FormularioVoluntario.css';
 import { Menu } from '../components/Menu';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { useState } from 'react';
 
-import { cadastrarVoluntario } from '../api/voluntarios';
+import { cadastrarVoluntario, editarVoluntario } from '../api/voluntarios';
 
 export function FormularioVoluntario() {
+	const location = useLocation();
+
+	// Resgata os dados do voluntário que foram enviados pelo botão
+	const voluntario = location.state?.voluntario;
 
 	const usuario = JSON.parse(
 		localStorage.getItem('usuario')
@@ -17,27 +21,27 @@ export function FormularioVoluntario() {
 		return <Navigate to="/voluntarios" />;
 	}
 
-	const [nome, setNome] = useState('');
-	const [cpf, setCpf] = useState('');
-	const [email, setEmail] = useState('');
-	const [telefone, setTelefone] = useState('');
+	const [nome, setNome] = useState(voluntario?.nome || '');
+	const [cpf, setCpf] = useState(voluntario?.cpf || '');
+	const [email, setEmail] = useState(voluntario?.email || '');
+	const [telefone, setTelefone] = useState(voluntario?.telefone || '');
 
-	const [dataNascimento, setDataNascimento] = useState('');
-	const [nacionalidade, setNacionalidade] = useState('');
-	const [endereco, setEndereco] = useState('');
-	const [cidade, setCidade] = useState('');
-	const [estado, setEstado] = useState('');
+	const [dataNascimento, setDataNascimento] = useState(voluntario?.dataNascimento || '');
+	const [nacionalidade, setNacionalidade] = useState(voluntario?.nacionalidade || '');
+	const [endereco, setEndereco] = useState(voluntario?.endereco || '');
+	const [cidade, setCidade] = useState(voluntario?.cidade || '');
+	const [estado, setEstado] = useState(voluntario?.estado || '');
 
-	const [dataEntrada, setDataEntrada] = useState('');
-	const [dataSaida, setDataSaida] = useState('');
+	const [dataEntrada, setDataEntrada] = useState(voluntario?.dataEntrada || '');
+	const [dataSaida, setDataSaida] = useState(voluntario?.dataSaida || '');
 
-	const [estudanteUtfpr, setEstudanteUtfpr] = useState(false);
+	const [estudanteUtfpr, setEstudanteUtfpr] = useState(voluntario?.estudanteUtfpr || false);
 
-	const [curso, setCurso] = useState('');
-	const [periodo, setPeriodo] = useState('');
-	const [ra, setRa] = useState('');
+	const [curso, setCurso] = useState(voluntario?.curso || '');
+	const [periodo, setPeriodo] = useState(voluntario?.periodo || '');
+	const [ra, setRa] = useState(voluntario?.ra || '');
 
-	const [sinteseAtividades, setSinteseAtividades] = useState('');
+	const [sinteseAtividades, setSinteseAtividades] = useState(voluntario?.sinteseAtividades || '');
 
 	async function handleSubmit(event) {
 
@@ -68,7 +72,7 @@ export function FormularioVoluntario() {
 			return;
 		}
 
-		const voluntario = {
+		const voluntarioAtt = {
 			nome,
 			cpf,
 			email,
@@ -90,41 +94,51 @@ export function FormularioVoluntario() {
 
 		try {
 
-			await cadastrarVoluntario(voluntario);
+			// Verificamos se existe um id (ou a propriedade que identifica seu voluntario)
+			// Se existir, significa que estamos editando.
+			if (voluntario?.id) {
+				await editarVoluntario(voluntario.id, voluntarioAtt);
+				alert('Voluntário atualizado com sucesso!');
+			} else {
+				// Se não tem ID, é um cadastro novo
+				await cadastrarVoluntario(voluntarioAtt);
+				alert('Voluntário cadastrado com sucesso!');
+				limparDados()
+			}
 
-			alert('Voluntário cadastrado com sucesso!');
+		} catch (error) {
+			console.error(error);
 
-			setNome('');
-			setCpf('');
-			setEmail('');
-			setTelefone('');
-			setDataNascimento('');
-			setNacionalidade('');
-			setEndereco('');
-			setCidade('');
-			setEstado('');
-			setDataEntrada('');
-			setDataSaida('');
+			console.log('Resposta:', error.response);
 
-			setEstudanteUtfpr(false);
-
-			setCurso('');
-			setPeriodo('');
-			setRa('');
-
-			setSinteseAtividades('');
-
-		}catch (error) {
-  			console.error(error);
-
- 			 console.log('Resposta:', error.response);
-
-  		alert(
-    		error.response?.data?.erro ||
-    		error.response?.data?.message ||
-    		'Erro ao cadastrar voluntário.'
-  		);
+			alert(
+				error.response?.data?.erro ||
+				error.response?.data?.message ||
+				'Erro ao cadastrar voluntário.'
+			);
 		}
+	}
+
+	function limparDados() {
+		setNome('');
+		setCpf('');
+		setEmail('');
+		setTelefone('');
+		setDataNascimento('');
+		setNacionalidade('');
+		setEndereco('');
+		setCidade('');
+		setEstado('');
+		setDataEntrada('');
+		setDataSaida('');
+
+		setEstudanteUtfpr(false);
+
+		setCurso('');
+		setPeriodo('');
+		setRa('');
+
+		setSinteseAtividades('');
 	}
 
 	return (
@@ -134,7 +148,7 @@ export function FormularioVoluntario() {
 
 			<div className="container-formulario">
 
-				<h2>Cadastro de Voluntário</h2>
+				<h2>{voluntario ? 'Editar Voluntário' : 'Cadastro de Voluntário'}</h2>
 
 				<form
 					className="formulario-voluntario"
