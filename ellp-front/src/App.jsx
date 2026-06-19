@@ -7,6 +7,7 @@ import { Inicial } from './pages/Inicial'
 import { ListagemVoluntarios } from './pages/ListagemVoluntarios'
 import { FormularioVoluntario } from './pages/FormularioVoluntario'
 import { PrivateRoute } from './components/PrivateRoute'
+import { TrocarSenha } from './pages/TrocarSenha'
 
 
 function App() {
@@ -39,6 +40,15 @@ function App() {
         path="/inicial"
         element={
             <Inicial />
+        }
+      />
+
+      <Route
+        path="/trocar-senha"
+        element={
+          // <PrivateRoute>
+            <TrocarSenha />
+          // </PrivateRoute>
         }
       />
 

@@ -24,3 +24,10 @@ export const registrarSaida = (id) =>
 
 export const gerarTermo = (id) =>
   api.get(`/voluntarios/${id}/termo`, { responseType: 'blob' });
+
+export async function trocarSenha(idUsuario, senhaAtual, novaSenha) {
+  return await api.patch(`/usuarios/${idUsuario}/alterar-senha`, {
+    senhaAtual: senhaAtual,
+    novaSenha: novaSenha
+  });
+}
