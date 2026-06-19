@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
-import { listarVoluntarios, registrarSaida, gerarTermo } from '../api/voluntarios';
+import {
+	listarVoluntarios,
+	registrarSaida,
+	ativarVoluntario,
+	gerarTermo
+} from '../api/voluntarios';
 import { Menu } from '../components/Menu';
 import { formatarData } from '../uteis/formatarData';
 import { useNavigate } from 'react-router-dom';
@@ -45,6 +50,34 @@ export function ListagemVoluntarios() {
 			.catch(error => {
 				console.error('Erro ao desativar voluntário:', error)
 				mostrarMensagem('Erro ao desativar voluntário.', 'erro')
+			});
+	}
+
+	function ativarVoluntarioLista(id) {
+		ativarVoluntario(id)
+			.then(() => {
+				setVoluntarios(prev =>
+					prev.map(v =>
+						v.id === id
+							? {
+									...v,
+									ativo: true,
+									dataSaida: null
+						  	}
+							: v
+					)
+				);
+
+				mostrarMensagem('Voluntário ativado com sucesso.', 'sucesso');
+			})
+			.catch(error => {
+				console.error('Erro ao ativar voluntário:', error);
+
+				mostrarMensagem(
+					error.response?.data?.erro ||
+					'Erro ao ativar voluntário.',
+					'erro'
+				);
 			});
 	}
 
@@ -156,15 +189,25 @@ export function ListagemVoluntarios() {
 
 							<td className='botao-desativar'>
 
-								{isAdmin && voluntario.ativo && (
-									<button
-										onClick={(e) => {
-											e.stopPropagation();
-											desativarVoluntario(voluntario.id);
-										}}
-									>
-										Desativar
-									</button>
+								{isAdmin && (voluntario.ativo ? (
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+									desativarVoluntario(voluntario.id);
+								}}
+								>	
+									Desativar
+								</button>
+								) : (
+										<button
+											onClick={(e) => {
+												e.stopPropagation();
+												ativarVoluntarioLista(voluntario.id);
+											}}
+										>
+											Ativar
+										</button>
+									)
 								)}
 
 								{isAdmin && (

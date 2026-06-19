@@ -22,5 +22,8 @@ export const removerVoluntario = (id) =>
 export const registrarSaida = (id) =>
   api.patch(`/voluntarios/${id}/saida`);
 
+export const ativarVoluntario = (id) =>
+  api.patch(`/voluntarios/${id}/ativar`);
+
 export const gerarTermo = (id) =>
   api.get(`/voluntarios/${id}/termo`, { responseType: 'blob' });
