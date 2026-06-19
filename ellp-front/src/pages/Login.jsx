@@ -17,7 +17,6 @@ export function Login() {
 		event.preventDefault();
 
 		try {
-
 			const response = await axios.post(
 				'http://localhost:8081/api/usuarios/login',
 				{
@@ -30,7 +29,13 @@ export function Login() {
 				'usuario',
 				JSON.stringify(response.data)
 			);
-			navigate('/inicial')
+			if (response.data.primeiroLogin) {
+				navigate('/trocar-senha')
+			}
+			else {
+				navigate('/inicial')
+			}
+
 
 		} catch (error) {
 
