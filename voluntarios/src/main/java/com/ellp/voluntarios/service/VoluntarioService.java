@@ -5,6 +5,8 @@ import com.ellp.voluntarios.model.Voluntario;
 import com.ellp.voluntarios.repository.VoluntarioRepository;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import com.ellp.voluntarios.model.Usuario;
+import com.ellp.voluntarios.repository.UsuarioRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,13 +16,38 @@ import java.util.List;
 public class VoluntarioService {
 
     private final VoluntarioRepository repository;
+    private final UsuarioRepository usuarioRepository;
 
     public Voluntario cadastrar(Voluntario voluntario) {
+
         if (repository.existsByCpf(voluntario.getCpf())) {
             throw new IllegalArgumentException("CPF já cadastrado: " + voluntario.getCpf());
         }
+        
         voluntario.setAtivo(true);
-        return repository.save(voluntario);
+        
+        // 2. Salvamos o voluntário e guardamos o retorno numa variável 
+        // (pois agora ele tem um ID gerado pelo banco)
+        Voluntario voluntarioSalvo = repository.save(voluntario);
+        
+        // 3. Criamos o usuário atrelado a esse novo voluntário
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(voluntarioSalvo.getNome());
+        novoUsuario.setEmail(voluntarioSalvo.getEmail());
+        
+        // Configura a senha padrão (ex: "123123")
+        novoUsuario.setSenha("123");
+        
+        novoUsuario.setTipo("VOLUNTARIO"); // Define o nível de permissão
+        novoUsuario.setPrimeiroLogin(true); // Força a tela de troca de senha no React
+        
+        novoUsuario.setVoluntarioId(voluntarioSalvo.getId());
+        
+        // 4. Salva o novo usuário no banco de dados
+        usuarioRepository.save(novoUsuario);
+        
+        // 5. Retorna o voluntário (como o Controller já esperava)
+        return voluntarioSalvo;
     }
 
     public Voluntario editar(Long id, Voluntario dados) {
