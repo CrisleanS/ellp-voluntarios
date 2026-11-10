@@ -29,6 +29,16 @@
 	font-size: 1rem;
 }
 
+.grupo-form input[aria-invalid="true"] {
+	border-color: #c62828;
+}
+
+.erro-campo {
+	color: #c62828;
+	font-size: 0.875rem;
+	margin-top: 0.3rem;
+}
+
 .formulario-voluntario button {
 	background-color: #ea7b23;
 	color: white;

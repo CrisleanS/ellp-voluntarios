@@ -1,8 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8081/api',
-});
+import api from './client';
 
 export const listarVoluntarios = (ativo) =>
   api.get('/voluntarios', { params: ativo !== undefined ? { ativo } : {} });
@@ -27,10 +23,3 @@ export const ativarVoluntario = (id) =>
 
 export const gerarTermo = (id) =>
   api.get(`/voluntarios/${id}/termo`, { responseType: 'blob' });
-
-export async function trocarSenha(idUsuario, senhaAtual, novaSenha) {
-  return await api.patch(`/usuarios/${idUsuario}/alterar-senha`, {
-    senhaAtual: senhaAtual,
-    novaSenha: novaSenha
-  });
-}

@@ -2,13 +2,16 @@ package com.ellp.voluntarios.service;
 
 import com.ellp.voluntarios.exception.RecursoNaoEncontradoException;
 import com.ellp.voluntarios.model.Voluntario;
+import com.ellp.voluntarios.model.Usuario;
 import com.ellp.voluntarios.repository.VoluntarioRepository;
+import com.ellp.voluntarios.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +28,12 @@ class VoluntarioServiceTest {
     @Mock
     private VoluntarioRepository repository;
 
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private VoluntarioService service;
 
@@ -35,9 +44,9 @@ class VoluntarioServiceTest {
         voluntario = Voluntario.builder()
                 .id(1L)
                 .nome("João Silva")
-                .cpf("123.456.789-00")
+                .cpf("529.982.247-25")
                 .email("joao@email.com")
-                .telefone("43999999999")
+                .telefone("43 99999 9999")
                 .dataNascimento(LocalDate.of(2000, 1, 1))
                 .nacionalidade("Brasileira")
                 .endereco("Rua A, 100")
@@ -51,20 +60,28 @@ class VoluntarioServiceTest {
 
     @Test
     void deve_cadastrar_voluntario_com_sucesso() {
-        when(repository.existsByCpf(voluntario.getCpf())).thenReturn(false);
+        when(repository.existsByCpfIn(List.of(voluntario.getCpf(), "52998224725"))).thenReturn(false);
+        when(repository.existsByEmailIgnoreCase(voluntario.getEmail())).thenReturn(false);
+        when(usuarioRepository.existsByEmailIgnoreCase(voluntario.getEmail())).thenReturn(false);
         when(repository.save(any())).thenReturn(voluntario);
+        when(passwordEncoder.encode(any())).thenReturn("encoded-password");
 
         Voluntario resultado = service.cadastrar(voluntario);
-
         assertNotNull(resultado);
         assertEquals("João Silva", resultado.getNome());
+        assertEquals("529.982.247-25", resultado.getCpf());
+        assertEquals("43 99999 9999", resultado.getTelefone());
         assertTrue(resultado.getAtivo());
         verify(repository, times(1)).save(voluntario);
+        var contaSalva = org.mockito.ArgumentCaptor.forClass(Usuario.class);
+        verify(usuarioRepository).save(contaSalva.capture());
+        assertTrue(contaSalva.getValue().getPrimeiroLogin());
+        assertEquals("encoded-password", contaSalva.getValue().getSenha());
     }
 
     @Test
     void deve_lancar_excecao_cpf_duplicado() {
-        when(repository.existsByCpf(voluntario.getCpf())).thenReturn(true);
+        when(repository.existsByCpfIn(List.of(voluntario.getCpf(), "52998224725"))).thenReturn(true);
 
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
@@ -72,6 +89,81 @@ class VoluntarioServiceTest {
         );
 
         assertTrue(ex.getMessage().contains("CPF já cadastrado"));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deve_rejeitar_cpf_com_digitos_verificadores_invalidos() {
+        voluntario.setCpf("123.456.789-00");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.cadastrar(voluntario)
+        );
+
+        assertEquals("Informe um CPF válido.", ex.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deve_formatar_telefone_ao_cadastrar() {
+        voluntario.setTelefone("(43) 99999-9999");
+        when(repository.existsByCpfIn(anyList())).thenReturn(false);
+        when(repository.existsByEmailIgnoreCase(voluntario.getEmail())).thenReturn(false);
+        when(usuarioRepository.existsByEmailIgnoreCase(voluntario.getEmail())).thenReturn(false);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(passwordEncoder.encode(any())).thenReturn("encoded-password");
+
+        Voluntario resultado = service.cadastrar(voluntario);
+
+        assertEquals("43 99999 9999", resultado.getTelefone());
+    }
+
+    @Test
+    void deve_rejeitar_telefone_com_ddd_invalido() {
+        voluntario.setTelefone("00 99999 9999");
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.cadastrar(voluntario)
+        );
+
+        assertEquals("Informe um telefone válido com DDD.", ex.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deve_rejeitar_datas_e_dados_academicos_invalidos_no_servico() {
+        voluntario.setDataNascimento(null);
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
+
+        voluntario.setDataNascimento(LocalDate.now().plusDays(1));
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
+
+        voluntario.setDataNascimento(LocalDate.of(2000, 1, 1));
+        voluntario.setDataSaida(voluntario.getDataEntrada().minusDays(1));
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
+
+        voluntario.setDataSaida(null);
+        voluntario.setEstudanteUtfpr(true);
+        voluntario.setCurso(" ");
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
+
+        voluntario.setCurso("Computação");
+        voluntario.setPeriodo("1º");
+        voluntario.setRa("RA inválido");
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deve_rejeitar_cpf_nulo_ou_com_formato_incorreto() {
+        voluntario.setCpf(null);
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
+
+        voluntario.setCpf("529 982 247 25");
+        assertThrows(IllegalArgumentException.class, () -> service.cadastrar(voluntario));
         verify(repository, never()).save(any());
     }
 
@@ -160,6 +252,85 @@ class VoluntarioServiceTest {
         assertEquals("Atividades de extensão", resultado.getSinteseAtividades());
         assertTrue(resultado.getEstudanteUtfpr());
         verify(repository).save(voluntario);
+    }
+
+    @Test
+    void deve_editar_cpf_valido_quando_nao_esta_cadastrado() {
+        Voluntario dadosAtualizados = Voluntario.builder()
+                .nome("João Editado")
+                .cpf("111.444.777-35")
+                .email("joao.novo@email.com")
+                .telefone("43 98888 8888")
+                .dataNascimento(LocalDate.of(2000, 1, 1))
+                .nacionalidade("Brasileira")
+                .endereco("Rua B, 200")
+                .cidade("Cornélio Procópio")
+                .estado("PR")
+                .estudanteUtfpr(false)
+                .build();
+        when(repository.findById(1L)).thenReturn(Optional.of(voluntario));
+        when(repository.existsByCpfInAndIdNot(List.of("111.444.777-35", "11144477735"), 1L))
+                .thenReturn(false);
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(usuarioRepository.findByVoluntarioId(1L)).thenReturn(Optional.of(Usuario.builder().id(10L).build()));
+        when(usuarioRepository.existsByEmailIgnoreCaseAndIdNot("joao.novo@email.com", 10L)).thenReturn(false);
+
+        Voluntario resultado = service.editar(1L, dadosAtualizados);
+
+        assertEquals("111.444.777-35", resultado.getCpf());
+        verify(usuarioRepository).save(any(Usuario.class));
+    }
+
+    @Test
+    void deve_recusar_cpf_que_ja_pertence_a_outro_voluntario() {
+        Voluntario dadosAtualizados = Voluntario.builder()
+                .cpf("111.444.777-35")
+                .nome("João Editado")
+                .email("joao@email.com")
+                .telefone("43 99999 9999")
+                .dataNascimento(LocalDate.of(2000, 1, 1))
+                .nacionalidade("Brasileira")
+                .endereco("Rua A, 100")
+                .cidade("Cornélio Procópio")
+                .estado("PR")
+                .estudanteUtfpr(false)
+                .build();
+        when(repository.findById(1L)).thenReturn(Optional.of(voluntario));
+        when(repository.existsByCpfInAndIdNot(List.of("111.444.777-35", "11144477735"), 1L))
+                .thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.editar(1L, dadosAtualizados)
+        );
+
+        assertTrue(exception.getMessage().contains("CPF já cadastrado"));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deve_recusar_email_que_ja_pertence_a_outro_voluntario() {
+        Voluntario dadosAtualizados = Voluntario.builder()
+                .nome("João Editado")
+                .email("outro@email.com")
+                .telefone("43 99999 9999")
+                .dataNascimento(LocalDate.of(2000, 1, 1))
+                .nacionalidade("Brasileira")
+                .endereco("Rua A, 100")
+                .cidade("Cornélio Procópio")
+                .estado("PR")
+                .estudanteUtfpr(false)
+                .build();
+        when(repository.findById(1L)).thenReturn(Optional.of(voluntario));
+        when(repository.existsByEmailIgnoreCaseAndIdNot("outro@email.com", 1L)).thenReturn(true);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.editar(1L, dadosAtualizados)
+        );
+
+        assertTrue(exception.getMessage().contains("E-mail já cadastrado"));
+        verify(repository, never()).save(any());
     }
 
     @Test

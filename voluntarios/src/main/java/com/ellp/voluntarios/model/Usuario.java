@@ -32,6 +32,7 @@ public class Usuario {
     @NotBlank
     private String tipo; // "ADMIN" ou "VOLUNTARIO"
 
+    @Builder.Default
     private Boolean primeiroLogin = true;
 
     // Vínculo opcional com a tabela de voluntários

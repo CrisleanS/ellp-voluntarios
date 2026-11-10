@@ -13,6 +13,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
@@ -42,7 +45,12 @@ class VoluntarioControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .defaultRequest(get("/").with(SecurityMockMvcRequestPostProcessors.jwt()
+                        .jwt(jwt -> jwt.claim("uid", 1L).claim("voluntarioId", 1L))
+                        .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .build();
 
         voluntario = Voluntario.builder()
                 .id(1L)
@@ -86,7 +94,8 @@ class VoluntarioControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nome").value("João Silva"));
+                .andExpect(jsonPath("$.nome").value("João Silva"))
+                .andExpect(jsonPath("$.senhaTemporaria").doesNotExist());
     }
 
     @Test
@@ -158,6 +167,26 @@ class VoluntarioControllerTest {
         mockMvc.perform(get("/api/voluntarios"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nome").value("João Silva"));
+    }
+
+    @Test
+    void get_lista_deve_exigir_autenticacao() throws Exception {
+        MockMvc semAutenticacao = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+
+        semAutenticacao.perform(get("/api/voluntarios"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.erro").value("Autenticação necessária ou token inválido."));
+    }
+
+    @Test
+    void voluntario_nao_pode_consultar_dados_de_outro_voluntario() throws Exception {
+        mockMvc.perform(get("/api/voluntarios/1")
+                        .with(SecurityMockMvcRequestPostProcessors.jwt()
+                                .jwt(jwt -> jwt.claim("uid", 2L).claim("voluntarioId", 2L))
+                                .authorities(new SimpleGrantedAuthority("ROLE_VOLUNTARIO"))))
+                .andExpect(status().isForbidden());
     }
 
     // ── GET por id ──

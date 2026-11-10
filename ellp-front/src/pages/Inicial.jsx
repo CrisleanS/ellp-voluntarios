@@ -4,11 +4,14 @@ import { Menu } from '../components/Menu';
 import { buscarVoluntario, gerarTermo } from '../api/voluntarios';
 import { formatarData } from '../uteis/formatarData';
 import './Inicial.css'
+import { Feedback } from '../components/Feedback';
 
 export function Inicial() {
 	const usuario = JSON.parse(localStorage.getItem('usuario'))
 	const [voluntario, setVoluntario] = useState(null)
 	const [modalAberto, setModalAberto] = useState(false)
+	const [mensagemErro, setMensagemErro] = useState('')
+	const [feedbackPDF, setFeedbackPDF] = useState(null)
 
 	useEffect(() => {
 		const idVoluntario = usuario.voluntarioId;
@@ -19,10 +22,12 @@ export function Inicial() {
 			})
 			.catch(error => {
 				console.error('Erro ao pegar detalhes do voluntário:', error)
+				setMensagemErro(error.response?.data?.erro || 'Erro ao carregar seus dados.')
 			});
-	}, []);
+	}, [usuario.voluntarioId]);
 
 	async function gerarPDF() {
+		setFeedbackPDF(null);
 		try {
 			const idVoluntario = usuario.voluntarioId || usuario.id;
 			const response = await gerarTermo(idVoluntario);
@@ -34,9 +39,13 @@ export function Inicial() {
 			link.download = `termo-voluntario-${idVoluntario}.pdf`;
 			link.click();
 			window.URL.revokeObjectURL(url);
+			setFeedbackPDF({ tipo: 'sucesso', mensagem: 'Termo gerado e baixado com sucesso.' });
 		} catch (error) {
 			console.error('Erro ao gerar PDF:', error);
-			alert('Erro ao gerar o termo em PDF.');
+			setFeedbackPDF({
+				tipo: 'erro',
+				mensagem: error.response?.data?.erro || 'Erro ao gerar o termo em PDF.',
+			});
 		}
 	}
 
@@ -155,6 +164,7 @@ export function Inicial() {
 			<Header />
 			<Menu />
 			<h2 className='saudacoes-usuario'>{`Olá, ${usuario.nome}`}</h2>
+			{mensagemErro && <p role="alert">{mensagemErro}</p>}
 
 			<div className='acoes-usuario'>
 				<button
@@ -171,6 +181,7 @@ export function Inicial() {
 					onClick={gerarPDF}
 				>Gerar PDF
 				</button>
+				<Feedback mensagem={feedbackPDF?.mensagem} tipo={feedbackPDF?.tipo} />
 			</div>
 
 			{modalAberto && voluntario && modalDetalhes()}

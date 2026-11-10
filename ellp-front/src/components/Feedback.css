@@ -1,0 +1,19 @@
+.feedback-mensagem {
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: 6px;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.feedback-mensagem.erro {
+	color: #a61b1b;
+	background: #fff0f0;
+	border: 1px solid #e8a4a4;
+}
+
+.feedback-mensagem.sucesso {
+	color: #176b35;
+	background: #edfff2;
+	border: 1px solid #91d6a5;
+}

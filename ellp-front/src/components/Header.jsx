@@ -6,6 +6,7 @@ export function Header() {
 
 	function logout() {
 		localStorage.removeItem('usuario');
+		localStorage.removeItem('token');
 		navigate('/');
 	}
 

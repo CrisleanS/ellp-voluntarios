@@ -1,47 +1,83 @@
 import './Login.css';
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import axios from 'axios';
+import { iniciarPrimeiroAcesso, login } from '../api/usuarios';
+import './PrimeiroAcesso.css';
+import { Feedback } from '../components/Feedback';
 
 export function Login() {
 
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const [email, setEmail] = useState('');
 	const [senha, setSenha] = useState('');
+	const [primeiroAcesso, setPrimeiroAcesso] = useState(false);
+	const [erroEmail, setErroEmail] = useState('');
+	const [erroLogin, setErroLogin] = useState('');
+	const [carregando, setCarregando] = useState(false);
+
+	function validarEmail(valor) {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor.trim());
+	}
 
 	async function handleLogin(event) {
 
 		event.preventDefault();
 
-		try {
-			const response = await axios.post(
-				'http://localhost:8081/api/usuarios/login',
-				{
-					email,
-					senha
-				}
-			);
+		setErroLogin('');
+		if (!validarEmail(email) || !senha.trim()) {
+			setErroLogin('E-mail ou senha inválidos.');
+			return;
+		}
 
-			localStorage.setItem(
-				'usuario',
-				JSON.stringify(response.data)
-			);
-			if (response.data.primeiroLogin) {
+		setCarregando(true);
+		try {
+			const response = await login({ email, senha });
+
+			localStorage.setItem('token', response.data.token);
+			localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+			if (response.data.usuario.primeiroLogin) {
 				navigate('/trocar-senha')
 			}
-			else {
+			else if (response.data.usuario.tipo === 'ADMIN') {
+				navigate('/voluntarios')
+			} else {
 				navigate('/inicial')
 			}
 
 
+		} catch {
+			setErroLogin('E-mail ou senha inválidos.');
+		} finally {
+			setCarregando(false);
+		}
+	}
+
+	async function handlePrimeiroAcesso(event) {
+		event.preventDefault();
+		setErroEmail('');
+
+		if (!validarEmail(email)) {
+			setErroEmail('E-mail inválido.');
+			return;
+		}
+
+		setCarregando(true);
+		try {
+			const response = await iniciarPrimeiroAcesso(email.trim());
+			navigate('/primeiro-acesso/senha', {
+				state: {
+					usuarioId: response.data.usuarioId,
+					token: response.data.token,
+				},
+			});
 		} catch (error) {
-
-			console.error(error);
-
-			alert('E-mail ou senha inválidos.');
+			setErroEmail(error.response?.data?.erro || 'Não foi possível iniciar o primeiro acesso.');
+		} finally {
+			setCarregando(false);
 		}
 	}
 
@@ -59,16 +95,48 @@ export function Login() {
 
 				</div>
 
-				<form
-					className="form-login"
-					onSubmit={handleLogin}
-				>
+				{primeiroAcesso ? (
+					<form className="form-login" onSubmit={handlePrimeiroAcesso} noValidate>
+						<div className="grupo-form">
+							<label htmlFor="email-primeiro-acesso">E-mail cadastrado</label>
+							<input
+								id="email-primeiro-acesso"
+								type="email"
+								value={email}
+								onChange={(event) => {
+									setEmail(event.target.value);
+									setErroEmail('');
+								}}
+								aria-invalid={Boolean(erroEmail)}
+								aria-describedby={erroEmail ? 'erro-email-primeiro-acesso' : undefined}
+								autoComplete="email"
+								required
+							/>
+							{erroEmail && <span id="erro-email-primeiro-acesso" className="erro-campo" role="alert">{erroEmail}</span>}
+						</div>
+						<button type="submit" className="botao-login" disabled={carregando}>
+							{carregando ? 'Verificando...' : 'Continuar'}
+						</button>
+						<button
+							type="button"
+							className="botao-secundario-login"
+							onClick={() => {
+								setPrimeiroAcesso(false);
+								setErroEmail('');
+							}}
+						>
+							Voltar ao login
+						</button>
+					</form>
+				) : (
+					<form className="form-login" onSubmit={handleLogin} noValidate>
 
 					<div className="grupo-form">
 
-						<label>E-mail</label>
+						<label htmlFor="email-login">E-mail</label>
 
 						<input
+							id="email-login"
 							type="email"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
@@ -79,25 +147,44 @@ export function Login() {
 
 					<div className="grupo-form">
 
-						<label>Senha</label>
+						<label htmlFor="senha-login">Senha</label>
 
 						<input
+							id="senha-login"
 							type="password"
 							value={senha}
-							onChange={(e) => setSenha(e.target.value)}
+							onChange={(e) => {
+								setSenha(e.target.value);
+								setErroLogin('');
+							}}
 							required
 						/>
+						<Feedback mensagem={erroLogin} />
 
 					</div>
 
 					<button
 						type="submit"
 						className="botao-login"
+						disabled={carregando}
 					>
-						Entrar
+						{carregando ? 'Entrando...' : 'Entrar'}
 					</button>
 
+					<button
+						type="button"
+						className="botao-secundario-login"
+						onClick={() => {
+							setPrimeiroAcesso(true);
+							setErroEmail('');
+							setErroLogin('');
+						}}
+					>
+						Primeiro acesso
+					</button>
+					<Feedback mensagem={location.state?.mensagem} tipo="sucesso" />
 				</form>
+				)}
 
 			</div>
 

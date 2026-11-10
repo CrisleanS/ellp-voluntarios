@@ -1,6 +1,5 @@
 package com.ellp.voluntarios.controller;
 
-import com.ellp.voluntarios.exception.RecursoNaoEncontradoException;
 import com.ellp.voluntarios.model.Usuario;
 import com.ellp.voluntarios.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +38,12 @@ class UsuarioControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .defaultRequest(post("/").with(SecurityMockMvcRequestPostProcessors.jwt()
+                        .jwt(jwt -> jwt.claim("uid", 1L))
+                        .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .build();
 
         usuario = Usuario.builder()
                 .id(1L)
@@ -65,9 +72,11 @@ class UsuarioControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("Admin ELLP"))
-                .andExpect(jsonPath("$.tipo").value("ADMIN"))
-                .andExpect(jsonPath("$.primeiroLogin").value(true));
+                .andExpect(jsonPath("$.usuario.nome").value("Admin ELLP"))
+                .andExpect(jsonPath("$.usuario.tipo").value("ADMIN"))
+                .andExpect(jsonPath("$.usuario.primeiroLogin").value(true))
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.usuario.senha").doesNotExist());
     }
 
     @Test
@@ -101,6 +110,82 @@ class UsuarioControllerTest {
         mockMvc.perform(post("/api/usuarios/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void post_primeiro_acesso_deve_retornar_token_temporario() throws Exception {
+        when(service.prepararPrimeiroAcesso("admin@ellp.com")).thenReturn(usuario);
+
+        mockMvc.perform(post("/api/usuarios/primeiro-acesso")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"admin@ellp.com"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.usuarioId").value(1))
+                .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    void post_primeiro_acesso_deve_validar_formato_do_email() throws Exception {
+        mockMvc.perform(post("/api/usuarios/primeiro-acesso")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"email-invalido"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("E-mail inválido."));
+    }
+
+    @Test
+    void post_primeiro_acesso_deve_informar_email_nao_cadastrado() throws Exception {
+        when(service.prepararPrimeiroAcesso("naoexiste@email.com"))
+                .thenThrow(new IllegalArgumentException("Usuário não foi cadastrado."));
+
+        mockMvc.perform(post("/api/usuarios/primeiro-acesso")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"naoexiste@email.com"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erro").value("Usuário não foi cadastrado."));
+    }
+
+    @Test
+    void patch_primeiro_acesso_deve_definir_senha_sem_senha_atual() throws Exception {
+        Usuario atualizado = Usuario.builder()
+                .id(1L)
+                .nome("Admin ELLP")
+                .email("admin@ellp.com")
+                .senha("$2a$encoded")
+                .tipo("ADMIN")
+                .primeiroLogin(false)
+                .build();
+        when(service.definirSenhaPrimeiroAcesso(1L, "SenhaForte1!", "SenhaForte1!"))
+                .thenReturn(atualizado);
+
+        mockMvc.perform(patch("/api/usuarios/1/primeiro-acesso/senha")
+                        .with(SecurityMockMvcRequestPostProcessors.jwt()
+                                .jwt(jwt -> jwt.claim("uid", 1L).claim("purpose", "first_access")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"senha":"SenhaForte1!","confirmarSenha":"SenhaForte1!"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.primeiroLogin").value(false))
+                .andExpect(jsonPath("$.senha").doesNotExist());
+    }
+
+    @Test
+    void patch_primeiro_acesso_deve_rejeitar_senha_sem_requisitos() throws Exception {
+        mockMvc.perform(patch("/api/usuarios/1/primeiro-acesso/senha")
+                        .with(SecurityMockMvcRequestPostProcessors.jwt()
+                                .jwt(jwt -> jwt.claim("uid", 1L).claim("purpose", "first_access")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"senha":"fraca","confirmarSenha":"fraca"}
+                                """))
                 .andExpect(status().isBadRequest());
     }
 
@@ -173,10 +258,7 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void patch_alterar_senha_deve_retornar_404_usuario_inexistente() throws Exception {
-        when(service.alterarSenha(eq(99L), any(), any()))
-                .thenThrow(new RecursoNaoEncontradoException("Usuário não encontrado: 99"));
-
+    void patch_alterar_senha_deve_impedir_alterar_senha_de_outro_usuario() throws Exception {
         String json = """
                 {
                   "senhaAtual": "qualquer",
@@ -187,8 +269,8 @@ class UsuarioControllerTest {
         mockMvc.perform(patch("/api/usuarios/99/alterar-senha")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.erro").value("Usuário não encontrado: 99"));
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("Você não tem permissão para esta operação."));
     }
 
     @Test

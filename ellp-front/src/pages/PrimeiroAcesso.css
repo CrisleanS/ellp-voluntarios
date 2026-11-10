@@ -1,0 +1,65 @@
+.botao-secundario-login {
+	padding: 12px;
+	border: 1px solid #1f5f8b;
+	border-radius: 8px;
+	background: white;
+	color: #1f5f8b;
+	font-size: 15px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.botao-secundario-login:hover {
+	background: #eef6fb;
+}
+
+.erro-campo {
+	margin: 6px 0 0;
+	color: #b42318;
+	font-size: 14px;
+}
+
+.mensagem-sucesso-login {
+	color: #18743a;
+	font-size: 14px;
+}
+
+.campo-senha {
+	display: flex;
+	align-items: stretch;
+}
+
+.campo-senha input {
+	flex: 1;
+	min-width: 0;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.botao-mostrar-senha {
+	padding: 0 12px;
+	border: 1px solid #ccc;
+	border-left: 0;
+	border-radius: 0 8px 8px 0;
+	background: #f5f5f5;
+	color: #1f5f8b;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.lista-requisitos {
+	display: grid;
+	gap: 6px;
+	margin: -8px 0 0;
+	padding-left: 4px;
+	list-style: none;
+	font-size: 14px;
+}
+
+.requisito-pendente {
+	color: #666;
+}
+
+.requisito-atendido {
+	color: #18743a;
+}

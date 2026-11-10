@@ -1,9 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export function Menu() {
-
-	const navigate = useNavigate();
-
 	const usuario = JSON.parse(
 		localStorage.getItem('usuario')
 	);

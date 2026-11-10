@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { trocarSenha } from '../api/voluntarios';
+import { trocarSenha } from '../api/usuarios';
 import './TrocarSenha.css'
-
-import axios from 'axios';
+import { Feedback } from '../components/Feedback';
 
 export function TrocarSenha() {
 
@@ -11,33 +10,37 @@ export function TrocarSenha() {
 
 	const [senhaAtual, setSenhaAtual] = useState('');
 	const [senhaNova, setSenhaNova] = useState('');
+	const [feedback, setFeedback] = useState(null);
+	const [usuarioAtualizado, setUsuarioAtualizado] = useState(null);
 
 	async function handleTrocarSenha(event) {
 		if (event) {
 			event.preventDefault();
 		}
+		setFeedback(null);
 
 		try {
 			const usuario = JSON.parse(localStorage.getItem('usuario'));
 
 			if (!usuario || !usuario.id) {
-				console.error("Usuário não encontrado no localStorage!");
+				setFeedback({ tipo: 'erro', mensagem: 'Não foi possível identificar o usuário. Entre novamente.' });
 				return;
 			}
 
 			const response = await trocarSenha(usuario.id, senhaAtual, senhaNova);
-			console.log("Sucesso na alteração:", response.data);
-			alert("Senha alterada com sucesso!");
-
-			navigate('/inicial')
+			localStorage.setItem('usuario', JSON.stringify(response.data));
+			setUsuarioAtualizado(response.data);
+			setFeedback({ tipo: 'sucesso', mensagem: 'Senha alterada com sucesso.' });
 
 		} catch (error) {
 			console.error("Erro ao trocar senha:", error);
-
-			// Exibe a mensagem de erro que vem do backend (conforme a issue pediu
 			const mensagemErro = error.response?.data?.erro || "Erro inesperado ao alterar senha";
-			console.log("Motivo do erro:", mensagemErro);
+			setFeedback({ tipo: 'erro', mensagem: mensagemErro });
 		}
+	}
+
+	function continuar() {
+		navigate(usuarioAtualizado?.tipo === 'ADMIN' ? '/voluntarios' : '/inicial');
 	}
 
 	return (
@@ -61,9 +64,10 @@ export function TrocarSenha() {
 
 					<div className="grupo-form">
 
-						<label>Senha atual</label>
+						<label htmlFor="senha-atual">Senha atual</label>
 
 						<input
+							id="senha-atual"
 							type="password"
 							value={senhaAtual}
 							onChange={(e) => setSenhaAtual(e.target.value)}
@@ -74,9 +78,10 @@ export function TrocarSenha() {
 
 					<div className="grupo-form">
 
-						<label>Senha nova</label>
+						<label htmlFor="senha-nova">Senha nova</label>
 
 						<input
+							id="senha-nova"
 							type="password"
 							value={senhaNova}
 							onChange={(e) => setSenhaNova(e.target.value)}
@@ -88,11 +93,21 @@ export function TrocarSenha() {
 					<button
 						type="submit"
 						className="botao-login"
+						disabled={Boolean(usuarioAtualizado)}
 					>
 						Alterar
 					</button>
 
+					<Feedback mensagem={feedback?.mensagem} tipo={feedback?.tipo} />
+
+					{usuarioAtualizado && (
+						<button type="button" className="botao-voltar" onClick={continuar}>
+							Continuar
+						</button>
+					)}
+
 					<button
+						type="button"
 						className="botao-voltar"
 						onClick={() => {
 							navigate('/')
